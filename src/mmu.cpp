@@ -99,6 +99,7 @@ void Mmu::print()
 		std::replace(hex.begin(), hex.end(), 'e', 'E');
 		std::replace(hex.begin(), hex.end(), 'f', 'F');
 
+	    std::cout << _processes[i]->pid
 	              << std::string( 2, space )
 	    	      << "| " 
 		      << _processes[i]->variables[j]->name
