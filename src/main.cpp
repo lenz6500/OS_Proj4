@@ -21,6 +21,13 @@ int main(int argc, char **argv)
     // Create physical 'memory'
     uint8_t *memory = new uint8_t[67108864]; // 64 MB (64 * 1024 * 1024)
 
+    //Create MMU
+    Mmu *mmu = new Mmu(page_size);
+    mmu->createProcess();
+    mmu->createNewProcess(5992,564);
+    mmu->createNewProcess(14788,296);
+    mmu->print();
+
     // Prompt loop
     std::string command;
     std::cout << "> ";
