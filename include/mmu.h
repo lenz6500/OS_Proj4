@@ -32,7 +32,11 @@ public:
 
     uint32_t createProcess();
     void print();
+    void printProcesses();
     uint32_t createNewProcess(uint32_t text_size, uint32_t data_size);
+    int allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element );
+    int findProcess(uint32_t pid);
+    int findFreeVar(int pid_index);
 };
 
 #endif // __MMU_H_

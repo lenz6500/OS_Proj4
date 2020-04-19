@@ -1,10 +1,13 @@
 #include <iostream>
 #include <string>
+#include <math.h>
 #include "mmu.h"
 #include "pagetable.h"
 
-void printStartMessage(int page_size);
 
+
+void printStartMessage(int page_size);
+std::vector<std::string> splitString(std::string text, char d);
 int main(int argc, char **argv)
 {
     // Ensure user specified page size as a command line parameter
@@ -17,17 +20,39 @@ int main(int argc, char **argv)
     // Print opening instuction message
     int page_size = std::stoi(argv[1]);
     printStartMessage(page_size);
+	int page_offset_bit = log2(page_size);
+	int page_number_bit = 32 - page_offset_bit;
+	std::cout << page_offset_bit <<": "<< page_number_bit<<"\n";
 
     // Create physical 'memory'
     uint8_t *memory = new uint8_t[67108864]; // 64 MB (64 * 1024 * 1024)
 
     //Create MMU
     Mmu *mmu = new Mmu(page_size);
-    mmu->createProcess();
+    //TEST:BEGIN
     mmu->createNewProcess(5992,564);
     mmu->createNewProcess(14788,296);
     mmu->print();
+	int t = 0;
+	t = mmu->allocate( 1024, "point_x", "int", 1 );
+	std::cout << t << "\n";
+	t = mmu->allocate( 1024, "point_y", "int", 1 );
+	std::cout << t << "\n";
+	t = mmu->allocate( 1024, "name", "char", 256 );
+	std::cout << t << "\n";
+	t = mmu->allocate( 1024, "time", "long", 2 );
+	std::cout << t << "\n";
+	t = mmu->allocate( 1024, "data", "int", 2000 );
+	std::cout << t << "\n";
+	t = mmu->allocate( 1025, "temperature", "double", 1 );
+	std::cout << t << "\n";
+	t = mmu->allocate( 1025, "pressure", "double", 1 );
+	std::cout << t << "\n";
+    	mmu->print();
+    //TEST:END
 
+    std::vector<std::string> spliter;
+    int size = 0;
     // Prompt loop
     std::string command;
     std::cout << "> ";
@@ -35,13 +60,58 @@ int main(int argc, char **argv)
     while (command != "exit") {
         // Handle command
         // TODO: implement this!
+	spliter = splitString(command, ' ');
+	size = spliter.size();
+	if( spliter[0].compare("create")==0 && size==3 )
+	{
+		std::cout << mmu->createNewProcess( std::stoi(spliter[1]), std::stoi(spliter[2]) )
+			  <<"\n";
+	}
+	else if( spliter[0].compare("allocate")==0 && size==5 )
+	{
+		std::cout << mmu->allocate( static_cast<uint32_t>(std::stoul(spliter[1])), 
+						spliter[2], spliter[3], std::stoi(spliter[4]) )
+			  << "\n";
+	}
+	else if( spliter[0].compare("set")==0 && size>4 )
+	{
+		
+	}
+	else if( spliter[0].compare("print")==0 && size>1 )
+	{
+		if( spliter[1].compare("mmu")==0 && size==2 )
+		{
+			mmu->print();
+		}
+		else if( spliter[1].compare("page")==0 )
+		{
 
+		}
+		else if( spliter[1].compare("processes")==0 )
+		{
+			mmu->printProcesses();
+		}
+		else{
+			//print <pid> <var_name>
+		}
+		
+	}
+	else if( spliter[0].compare("free")==0 )
+	{
+
+	}
+	else if( spliter[0].compare("terminate")==0 )
+	{
+
+	}
+	else
+	{
+		//error
+	}
         // Get next command
         std::cout << "> ";
         std::getline (std::cin, command);
     }
-
-
     return 0;
 }
 
@@ -60,4 +130,15 @@ void printStartMessage(int page_size)
     std::cout << "    * if <object> is \"processes\", print a list of PIDs for processes that are still running" << std:: endl;
     std::cout << "    * if <object> is a \"<PID>:<var_name>\", print the value of the variable for that process" << std:: endl;
     std::cout << std::endl;
+}
+// Returns vector of strings created by splitting `text` on every occurance of `d`
+std::vector<std::string> splitString(std::string text, char d)
+{
+    	std::vector<std::string> result;
+	std::string token;
+	std::stringstream tokenStream(text);
+	while(std::getline(tokenStream, token, d)){
+		result.push_back(token);
+	}
+    return result;
 }
