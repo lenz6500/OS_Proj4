@@ -20,22 +20,21 @@ int main(int argc, char **argv)
     // Print opening instuction message
     int page_size = std::stoi(argv[1]);
     printStartMessage(page_size);
-	int page_offset_bit = log2(page_size);
-	int page_number_bit = 32 - page_offset_bit;
-	std::cout << page_offset_bit <<": "<< page_number_bit<<"\n";
-
     // Create physical 'memory'
     uint8_t *memory = new uint8_t[67108864]; // 64 MB (64 * 1024 * 1024)
 
-    //Create MMU
+    //Create MMU and PageTable
     Mmu *mmu = new Mmu(page_size);
+    PageTable *page_table = new PageTable(page_size);
     //TEST:BEGIN
     mmu->createNewProcess(5992,564);
     mmu->createNewProcess(14788,296);
     mmu->print();
 	int t = 0;
+	int addr = 0;
 	t = mmu->allocate( 1024, "point_x", "int", 1 );
 	std::cout << t << "\n";
+	addr = page_table->getPhysicalAddress(1024, t);
 	t = mmu->allocate( 1024, "point_y", "int", 1 );
 	std::cout << t << "\n";
 	t = mmu->allocate( 1024, "name", "char", 256 );
