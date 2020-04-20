@@ -86,38 +86,31 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 
 	int virtual_addr = 0;
 
-    	/*var->name = var_name;
-    	var->virtual_address = _processes[index]->p_virtual_address;*/
 	//set size
 	if( data_type.compare("char") == 0 )
 	{ 
-		//var->size = num_element;
 		_processes[index]->variables[var_index]->size = num_element;
 	}
 	else if( data_type.compare("short") == 0 )
 	{ 
-		//var->size = 2*num_element;
 		_processes[index]->variables[var_index]->size = 2*num_element;
 	}
 	else if( data_type.compare("int") == 0 || data_type.compare("float") == 0 )
 	{ 
-		//var->size = 4*num_element; 
 		_processes[index]->variables[var_index]->size = 4*num_element;
 	}
 	else if( data_type.compare("long") == 0 || data_type.compare("double") == 0 )
-	{
-		//var->size = 8*num_element; 
+	{ 
 		_processes[index]->variables[var_index]->size = 8*num_element;
 	}
     	
 	virtual_addr = _processes[index]->p_virtual_address;
 	_processes[index]->p_virtual_address +=  _processes[index]->variables[var_index]->size;
-    	//_processes[index]->variables.push_back(var);
 
 	//Add and Track FREE SPACE
 	Variable *var = new Variable();
     	var->name = "<FREE_SPACE>";
-    	var->virtual_address = 0;
+    	var->virtual_address = _processes[index]->p_virtual_address;
     	var->size = _max_size - _processes[index]->p_virtual_address;
 	_processes[index]->variables.push_back(var);
 
