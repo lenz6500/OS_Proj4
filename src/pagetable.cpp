@@ -36,7 +36,7 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
 	while(page_size_holder > 1){
 		bitOffset + 1;
 		page_size_holder>>1;
-
+		std::cout <<"TEST";
 	}
 
 	printf("%d is bit offset;\n", bitOffset);
