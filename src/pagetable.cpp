@@ -26,17 +26,18 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
     // Convert virtual address to page_number and page_offset
 
 	int bitOffset = 0;
-	int page_size_holder = _page_size;
+	int page_size_holder = (int)_page_size;
 
 	//First offset;
 	bitOffset = 1;
-	page_size_holder>>1;
+	page_size_holder = page_size_holder>>1;
 
 	//Remaining offsets
 	while(page_size_holder > 1){
-		bitOffset + 1;
-		page_size_holder>>1;
-		std::cout <<"TEST";
+		bitOffset = bitOffset + 1;
+		page_size_holder = page_size_holder>>1;
+		//std::cout <<page_size_holder << "\n";
+		//std::cout << bitOffset << "\n";
 	}
 
 	printf("%d is bit offset;\n", bitOffset);
