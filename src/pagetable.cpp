@@ -40,13 +40,16 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
 		//std::cout << bitOffset << "\n";
 	}
 
-	printf("%d is bit offset;\n", bitOffset);
+
+	//printf("%d is virtual address;\n", virtual_address);
+	//printf("%d is bit offset;\n", bitOffset);
+	//printf("%d is value to and\n", (int)pow(2, bitOffset)-1);
 
     int page_number = virtual_address >> bitOffset;
-    int page_offset = virtual_address && (pow(2, bitOffset)-1);
+    int page_offset = virtual_address & ((int)pow(2, bitOffset)-1);
 
-	printf("%d is page number;\n", page_number);
-	printf("%d is page offset;\n", page_offset);
+	//printf("%d is page number;\n", page_number);
+	//printf("%d is page offset;\n", page_offset);
 
     // Combination of pid and page number act as the key to look up frame number
     std::string entry = std::to_string(pid) + "|" + std::to_string(page_number);
