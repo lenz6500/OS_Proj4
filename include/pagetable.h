@@ -8,6 +8,7 @@
 class PageTable {
 private:
     int _page_size;
+    int _page_offset_bit;//page offset
     std::map<std::string, int> _table;
 
 public:
