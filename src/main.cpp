@@ -26,28 +26,51 @@ int main(int argc, char **argv)
     //Create MMU and PageTable
     Mmu *mmu = new Mmu(page_size);
     PageTable *page_table = new PageTable(page_size);
+    int pid, number_of_pages;
+
     //TEST:BEGIN
-    mmu->createNewProcess(5992,564);
-    mmu->createNewProcess(14788,296);
+    pid = mmu->createNewProcess(5992,564,page_table);
+	page_table->print();
+
+    pid = mmu->createNewProcess(14788,296,page_table);
+	page_table->print();
+
     mmu->print();
 	int t = 0;
 	int addr = 0;
 	t = mmu->allocate( 1024, "point_x", "int", 1 );
 	std::cout << t << "\n";
 	addr = page_table->getPhysicalAddress(1024, t);
+
 	t = mmu->allocate( 1024, "point_y", "int", 1 );
 	std::cout << t << "\n";
-	t = mmu->allocate( 1024, "name", "char", 256 );
-	std::cout << t << "\n";
-	t = mmu->allocate( 1024, "time", "long", 2 );
-	std::cout << t << "\n";
-	t = mmu->allocate( 1024, "data", "int", 2000 );
-	std::cout << t << "\n";
+	addr = page_table->getPhysicalAddress(1024, t);
+
 	t = mmu->allocate( 1025, "temperature", "double", 1 );
 	std::cout << t << "\n";
+	addr = page_table->getPhysicalAddress(1025, t);
+
+	t = mmu->allocate( 1024, "name", "char", 256 );
+	std::cout << t << "\n";
+	addr = page_table->getPhysicalAddress(1024, t);
+
+	t = mmu->allocate( 1024, "time", "long", 2 );
+	std::cout << t << "\n";
+	addr = page_table->getPhysicalAddress(1024, t);
+
+	t = mmu->allocate( 1024, "data", "int", 2000 );
+	std::cout << t << "\n";
+	addr = page_table->getPhysicalAddress(1024, t);
+
 	t = mmu->allocate( 1025, "pressure", "double", 1 );
 	std::cout << t << "\n";
+	addr = page_table->getPhysicalAddress(1025, t);
     	mmu->print();
+
+	mmu->terminate(1025);
+    	mmu->print();
+
+	//page_table->print();
     //TEST:END
 
     std::vector<std::string> spliter;
@@ -63,8 +86,9 @@ int main(int argc, char **argv)
 	size = spliter.size();
 	if( spliter[0].compare("create")==0 && size==3 )
 	{
-		std::cout << mmu->createNewProcess( std::stoi(spliter[1]), std::stoi(spliter[2]) )
+		std::cout << mmu->createNewProcess( std::stoi(spliter[1]), std::stoi(spliter[2]), page_table)
 			  <<"\n";
+		
 	}
 	else if( spliter[0].compare("allocate")==0 && size==5 )
 	{
@@ -84,7 +108,7 @@ int main(int argc, char **argv)
 		}
 		else if( spliter[1].compare("page")==0 )
 		{
-
+			page_table->print();
 		}
 		else if( spliter[1].compare("processes")==0 )
 		{
@@ -99,9 +123,9 @@ int main(int argc, char **argv)
 	{
 
 	}
-	else if( spliter[0].compare("terminate")==0 )
+	else if( spliter[0].compare("terminate")==0 && size==2 )
 	{
-
+		mmu->terminate( std::stoi(spliter[1]) );
 	}
 	else
 	{
