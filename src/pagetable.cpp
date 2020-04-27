@@ -18,7 +18,20 @@ void PageTable::addEntry(uint32_t pid, int page_number)
     // Find free frame
     // TODO: implement this!
     int frame = 0; 
-    _table[entry] = frame;
+    _table[entry] = frame; //How to check if a frame is occupied or not?
+
+	//allocate new page for same process
+	//Do any of entries == frame[0],[1], etc.
+	//Store array of frames; set all to neg1
+	//Bool array based on number of frames available.
+	//THis would be called when an original page runs out of room to store variables. (allocate or create).
+
+	bool found = 0;
+	while(found == 0){
+		
+		
+	}
+
 }
 
 int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
@@ -28,7 +41,7 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
 	int bitOffset = 0;
 	int page_size_holder = (int)_page_size;
 
-	//First offset;
+	//First offset
 	bitOffset = 1;
 	page_size_holder = page_size_holder>>1;
 
