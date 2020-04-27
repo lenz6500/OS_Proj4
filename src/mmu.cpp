@@ -125,8 +125,18 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 
 	return virtual_addr;
 }
-int set(uint32_t pid, const std::string& var_name, const std::vector<std::string> &values, PageTable *pageTable)
+int Mmu::set(uint32_t pid, uint32_t offset, const std::string& var_name, std::vector<std::string> &values, PageTable *pageTable)
 {
+
+	int index = findProcess(pid);
+
+	index = index + offset;
+
+	for(std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it){
+
+	}
+
+
 	return 0;
 }
 int free(uint32_t pid, const std::string& var_name, PageTable *pageTable)
@@ -148,6 +158,7 @@ int Mmu::terminate(uint32_t pid)
 	
 	return 0;
 }
+
 int Mmu::findProcess(uint32_t pid)
 {
     	for (int i = 0; i < _processes.size(); i++)
