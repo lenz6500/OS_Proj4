@@ -1,5 +1,6 @@
 #include "mmu.h"
-
+#include "pagetable.h"
+#define STACK_SIZE 65536
 Mmu::Mmu(int memory_size)
 {
     _next_pid = 1024;
@@ -27,9 +28,9 @@ uint32_t Mmu::createProcess()
     _next_pid++;
     return proc->pid;
 }
-uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size)
+uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable)
 {
-    	int i, j, max_size;
+    	int i, j, max_size, number_of_pages;
 	bool found = false;
 	uint32_t pid = createProcess();
 	int index = findProcess(pid);//no error
@@ -63,6 +64,14 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size)
     		var->virtual_address = 0;
     		var->size = _max_size - _processes[index]->p_virtual_address;
 		_processes[index]->variables.push_back(var);
+
+		//Create page table
+		number_of_pages = (int)(text_size+data_size+STACK_SIZE)/pageTable->getPageSize();
+
+		for(i=0; i<=number_of_pages; i++)
+		{
+			pageTable->addEntry(pid, i);
+		}
 	}
 	return pid;
 }
@@ -115,6 +124,29 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 	_processes[index]->variables.push_back(var);
 
 	return virtual_addr;
+}
+int set(uint32_t pid, const std::string& var_name, const std::vector<std::string> &values, PageTable *pageTable)
+{
+	return 0;
+}
+int free(uint32_t pid, const std::string& var_name, PageTable *pageTable)
+{
+	return 0;
+}
+int Mmu::terminate(uint32_t pid)
+{
+	int pid_index = findProcess(pid);
+	if( pid_index == -1 )
+	{ 
+		return -1; //error
+	}
+
+	_processes[pid_index]->variables.clear();
+	//not sure
+	_max_size = _max_size + _processes[pid_index]->p_virtual_address;
+	delete _processes[pid_index];
+	
+	return 0;
 }
 int Mmu::findProcess(uint32_t pid)
 {
@@ -180,7 +212,7 @@ void Mmu::print()
 		      << hex
 	              << " |"
 	              << std::string( 11 - std::to_string(_processes[i]->variables[j]->size).length() , space )
-		      << _processes[i]->variables[j]->size <<"\n";
+		      << _processes[i]->variables[j]->size << std:: endl;
         }
     }
 }
@@ -188,6 +220,6 @@ void Mmu::printProcesses()
 {
     for (int i = 0; i < _processes.size(); i++)
     {
-	std::cout << _processes[i]->pid << "\n";
+	std::cout << _processes[i]->pid << std:: endl;
     }
 }
