@@ -125,14 +125,17 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 
 	return virtual_addr;
 }
-int Mmu::set(uint32_t pid, uint32_t offset, const std::string& var_name, std::vector<std::string> &values, PageTable *pageTable)
+int Mmu::set(uint32_t pid, uint32_t offset, std::string& var_name, std::vector<std::string> &values, PageTable *pageTable)
 {
 
 	int index = findProcess(pid);
 
-	index = index + offset;
+	findVariableType(var_name, index);
 
 	for(std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it){
+		
+		//_process
+
 
 	}
 
@@ -180,6 +183,30 @@ int Mmu::findFreeVar(int pid_index)
 		}
 	}
 	return -1;
+}
+
+int Mmu::findVariableType(std::string& varName, int index){
+
+	for(int i = 0; i < _processes[index]->variables.size(); i ++){
+
+		if( _processes[index]->variables[i]->name.compare(varName) == 0){
+			
+
+			return _processes[index]->variables[i]->size;
+		}
+	}
+}
+
+int Mmu::findVariableAddr(std::string& varName, int index){
+
+	for(int i = 0; i < _processes[index]->variables.size(); i ++){
+
+		if( _processes[index]->variables[i]->name.compare(varName) == 0){
+			
+			return _processes[index]->variables[i]->virtual_address;
+		}
+	}
+
 }
 
 void Mmu::print()
