@@ -68,11 +68,32 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 		//Create page table
 		number_of_pages = (int)(text_size+data_size+STACK_SIZE)/pageTable->getPageSize();
 
+		//Get MAX number of pages for each Process
+		if( number_of_pages > pageTable->getMaxPageSize() )
+		{
+			pageTable->setMaxNumOfPage(number_of_pages);
+			std::cout << "MAX " << pageTable->getMaxPageSize() << "\n";
+		}
+		//Add entries for the table
 		for(i=0; i<=number_of_pages; i++)
 		{
 			pageTable->addEntry(pid, i);
 		}
+		//Update entry up to maximum pages
+		
+		
 	}
+
+
+	int vd = 0;
+
+        	for (j = 0; j < _processes[index]->variables.size(); j++)
+        	{
+			std::cout << "pid "<<  _processes[index]->pid <<": ";
+			vd = _processes[index]->variables[j]->virtual_address;
+			std::cout << _processes[index]->variables[j]->name << ": "<< vd <<" RRRR\n";
+		}
+
 	return pid;
 }
 int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element )
@@ -125,22 +146,29 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 
 	return virtual_addr;
 }
-int Mmu::set(uint8_t *memory, uint32_t pid, uint32_t offset, std::string& var_name, std::vector<std::string> &values, PageTable *pageTable)
+int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, const std::vector<std::string> &values, PageTable *pageTable)
 {
 
 	int index = findProcess(pid);
 	int varAddr = findVariableAddr(var_name, index);
 	int physAddr = pageTable->getPhysicalAddress(pid, varAddr);
 	int size = findVariableType(var_name, index);
-	int offset = 0;
+	int offset2 = 0;
 
 
-	for(std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it){
+	//for(std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it){
 		
-		memory[physAddr + offset] = it;
+		//memory[physAddr + offset2] = it;
 
+	//}
 
+	for(int i=0; i<values.size(); i++)
+	{
+		std::cout << values[i] << "\n";
 	}
+	
+
+
 
 
 	return 0;

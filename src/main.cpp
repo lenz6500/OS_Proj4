@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     uint8_t *memory = new uint8_t[67108864]; // 64 MB (64 * 1024 * 1024)
 
     //Create MMU and PageTable
-    Mmu *mmu = new Mmu(page_size);
+    Mmu *mmu = new Mmu(67108864);
     PageTable *page_table = new PageTable(page_size);
     int pid, number_of_pages;
 
@@ -60,6 +60,8 @@ int main(int argc, char **argv)
 
 	t = mmu->allocate( 1024, "data", "int", 2000 );
 	std::cout << t << "\n";
+        std::cout << t / page_size << " R\n";
+        std::cout << t % page_size << " R\n\n";
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1025, "pressure", "double", 1 );
@@ -74,6 +76,7 @@ int main(int argc, char **argv)
     //TEST:END
 
     std::vector<std::string> spliter;
+    
     int size = 0;
     // Prompt loop
     std::string command;
@@ -98,7 +101,12 @@ int main(int argc, char **argv)
 	}
 	else if( spliter[0].compare("set")==0 && size>4 )
 	{
-		
+		std::vector<std::string> values;
+		for(int j=4; j<spliter.size(); j++)
+		{
+			values.push_back(spliter[j]);
+		}
+		mmu->set(memory, stoi(spliter[1]), spliter[2], stoi(spliter[3]), values, page_table);
 	}
 	else if( spliter[0].compare("print")==0 && size>1 )
 	{

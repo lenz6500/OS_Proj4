@@ -6,6 +6,7 @@ PageTable::PageTable(int page_size)
     _page_size = page_size;
     _page_offset_bit = log2( page_size );
     frame_table = new std::vector<bool>();
+    _max_page_size = 0;
 }
 
 PageTable::~PageTable()
@@ -16,12 +17,14 @@ void PageTable::addEntry(uint32_t pid, int page_number)
 {
     // Combination of pid and page number act as the key to look up frame number
     std::string entry = std::to_string(pid) + "|" + std::to_string(page_number);
-
+    
+    //_table.insert( std::pair<std::string, int>("a", 1) );
+    //_table.insert( std::pair<std::string, int>("a", 0) );
     // Find free frame
     // TODO: implement this
 
     std::vector<bool>::iterator it;
-	std::cout << "SIZE: "<< frame_table->size() << std::endl;
+	//std::cout << "SIZE: "<< frame_table->size() << std::endl;
     
     for (it = frame_table->begin(); it != frame_table->end(); it++)
     {
@@ -30,7 +33,7 @@ void PageTable::addEntry(uint32_t pid, int page_number)
 		//std::cout << *it << std::endl;
 	}
     }
-
+    
     int frame = frame_table->size();
     frame_table->push_back(true);
     _table[entry] = frame;
@@ -42,6 +45,7 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
 
     	int page_number = virtual_address >> _page_offset_bit;
     	int page_offset = virtual_address & ((int)pow(2, _page_offset_bit)-1);
+
 
 	printf("%d is page number;\n", page_number);
 	printf("%d is page offset;\n", page_offset);
@@ -61,7 +65,33 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
 
     return address;
 }
-
+void PageTable::setMaxNumOfPage(int number_of_pages)
+{
+	_max_page_size = number_of_pages;
+}
+void PageTable::updateEntryTable()
+{
+	std::map<std::string, int>::iterator it;
+	int i=0;
+        std::string token;
+    	for (it = _table.begin(); it != _table.end(); it++)
+    	{
+		i=0;
+		std::stringstream tokenStream(it->first);
+		while(std::getline(tokenStream, token, '|'))
+		{
+			if(!i)
+			{
+				
+			}
+			else
+			{
+				
+			}
+			i++;
+		}
+	}
+}
 void PageTable::print()
 {
     std::map<std::string, int>::iterator it;
@@ -77,7 +107,8 @@ void PageTable::print()
         // TODO: print all pages
 	i=0;
 	std::stringstream tokenStream(it->first);
-	while(std::getline(tokenStream, token, '|')){
+	while(std::getline(tokenStream, token, '|'))
+	{
 		if(!i)
 		{
 			std::cout << " " << token << " |";
