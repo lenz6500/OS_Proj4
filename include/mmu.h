@@ -12,7 +12,9 @@ typedef struct Variable {
     std::string name;
     int virtual_address;
     int size;
+	std::vector<std::string*> data;
 } Variable;
+
 
 typedef struct Process {
     uint32_t pid;
@@ -40,7 +42,7 @@ public:
     int terminate(uint32_t pid);
     int findProcess(uint32_t pid);
     int findFreeVar(int pid_index);
-	int findVariableType(std::string& varName, int index);
+	int findVariableIndex(std::string& varName, int index);
     int findVariableAddr(std::string& varName, int index);
 };
 
