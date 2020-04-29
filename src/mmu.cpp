@@ -125,16 +125,19 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 
 	return virtual_addr;
 }
-int Mmu::set(uint32_t pid, uint32_t offset, std::string& var_name, std::vector<std::string> &values, PageTable *pageTable)
+int Mmu::set(uint8_t *memory, uint32_t pid, uint32_t offset, std::string& var_name, std::vector<std::string> &values, PageTable *pageTable)
 {
 
 	int index = findProcess(pid);
+	int varAddr = findVariableAddr(var_name, index);
+	int physAddr = pageTable->getPhysicalAddress(pid, varAddr);
+	int size = findVariableType(var_name, index);
+	int offset = 0;
 
-	findVariableType(var_name, index);
 
 	for(std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it){
 		
-		//_process
+		memory[physAddr + offset] = it;
 
 
 	}
