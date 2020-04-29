@@ -133,7 +133,9 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 	{ 
 		_processes[index]->variables[var_index]->size = 8*num_element;
 	}
-    	
+    
+	_processes[index]->variables[var_index]->data.resize(num_element); //Resize to how many elements supposed to be able to hold.
+	
 	virtual_addr = _processes[index]->p_virtual_address;
 	_processes[index]->p_virtual_address +=  _processes[index]->variables[var_index]->size;
 
@@ -146,31 +148,25 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 
 	return virtual_addr;
 }
-int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, const std::vector<std::string> &values, PageTable *pageTable)
+int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable)
 {
 
 	int index = findProcess(pid);
 	int varAddr = findVariableAddr(var_name, index);
 	int physAddr = pageTable->getPhysicalAddress(pid, varAddr);
-	int size = findVariableType(var_name, index);
-	int offset2 = 0;
 
-
-	//for(std::vector<std::string>::iterator it = values.begin(); it != values.end(); ++it){
-		
-		//memory[physAddr + offset2] = it;
-
-	//}
+	int var_index = findVariableIndex(var_name, index);
+	int addtlOffset = 0;
 
 	for(int i=0; i<values.size(); i++)
 	{
 		std::cout << values[i] << "\n";
+
+		_processes[index]->variables[var_index]->data[offset + addtlOffset] = &values[i];
+		//Still unsure how to exactly get the it to fit in here.
+		addtlOffset++;
+
 	}
-	
-
-
-
-
 	return 0;
 }
 int free(uint32_t pid, const std::string& var_name, PageTable *pageTable)
@@ -216,14 +212,14 @@ int Mmu::findFreeVar(int pid_index)
 	return -1;
 }
 
-int Mmu::findVariableType(std::string& varName, int index){
+int Mmu::findVariableIndex(std::string& varName, int index){
 
 	for(int i = 0; i < _processes[index]->variables.size(); i ++){
 
 		if( _processes[index]->variables[i]->name.compare(varName) == 0){
 			
 
-			return _processes[index]->variables[i]->size;
+			return i;
 		}
 	}
 }

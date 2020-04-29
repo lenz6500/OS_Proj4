@@ -12,7 +12,9 @@ typedef struct Variable {
     std::string name;
     int virtual_address;
     int size;
+    std::vector<std::string*> data;
 } Variable;
+
 
 typedef struct Process {
     uint32_t pid;
@@ -35,12 +37,12 @@ public:
     void printProcesses();
     uint32_t createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable);
     int allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element );
-    int set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, const std::vector<std::string> &values, PageTable *pageTable);
+    int set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable);
     int free(uint32_t pid, const std::string& var_name, PageTable *pageTable);
     int terminate(uint32_t pid);
     int findProcess(uint32_t pid);
     int findFreeVar(int pid_index);
-	int findVariableType(std::string& varName, int index);
+    int findVariableIndex(std::string& varName, int index);
     int findVariableAddr(std::string& varName, int index);
 };
 

@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 		{
 			values.push_back(spliter[j]);
 		}
-		mmu->set(memory, stoi(spliter[1]), spliter[2], stoi(spliter[3]), values, page_table);
+		//mmu->set(memory, stoi(spliter[1]), spliter[2], stoi(spliter[3]), values, page_table);
 	}
 	else if( spliter[0].compare("print")==0 && size>1 )
 	{
