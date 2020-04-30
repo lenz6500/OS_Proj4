@@ -129,7 +129,7 @@ int main(int argc, char **argv)
 	}
 	else if( spliter[0].compare("free")==0 )
 	{
-
+    	free(spliter[1], spliter[2], *page_table);
 	}
 	else if( spliter[0].compare("terminate")==0 && size==2 )
 	{

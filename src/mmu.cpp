@@ -169,8 +169,22 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 	}
 	return 0;
 }
-int free(uint32_t pid, const std::string& var_name, PageTable *pageTable)
+int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable)
 {
+	int index = findProcess(pid);
+	if( index == -1 )
+	{ 
+		return -1; //error
+	}
+	int var_index = findVariableIndex(var_name, index);
+	if( var_index == -1 )
+	{
+		return -1; //error
+	}
+	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
+	_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
+	_processes[index]->variables[var_index]->size = 0; //No size allocated.
+
 	return 0;
 }
 int Mmu::terminate(uint32_t pid)
