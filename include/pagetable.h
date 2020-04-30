@@ -22,7 +22,6 @@ public:
     int getPhysicalAddress(uint32_t pid, int virtual_address);
     void print();
     void setMaxNumOfPage(int number_of_pages);
-    void updateEntryTable();
     int getPageSize(){ return _page_size; }
     int getMaxPageSize(){ return _max_page_size; }
 };

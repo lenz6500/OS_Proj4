@@ -39,34 +39,33 @@ int main(int argc, char **argv)
 	int t = 0;
 	int addr = 0;
 	t = mmu->allocate( 1024, "point_x", "int", 1 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1024, "point_y", "int", 1 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1025, "temperature", "double", 1 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1025, t);
 
 	t = mmu->allocate( 1024, "name", "char", 256 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1024, "time", "long", 2 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1024, "data", "int", 2000 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1025, "pressure", "double", 1 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1025, t);
     	mmu->print();
-
 
 	std::string name = "name";
 	std::vector<std::string> values;
@@ -77,9 +76,22 @@ int main(int argc, char **argv)
 	values.push_back("t");
 	mmu->set( memory, 1024, name, 0, values, page_table);
 	mmu->printData(1024, name);
-	
 	//mmu->free( 1024, data , page_table );
 	//mmu->print();
+
+	std::string time = "time";
+	std::vector<std::string> values2;
+	values2.push_back("91235684");
+	mmu->set( memory, 1024, time, 0, values2, page_table);
+	std::vector<std::string> values3;
+	values3.push_back("35764365486");
+	mmu->set( memory, 1024, time, 1, values3, page_table);
+	mmu->printData(1024, time);
+
+	/*std::vector<std::string> values3;
+	values.push_back("3214567");
+	mmu->set( memory, 1025, time, 1, values3, page_table);*/
+	//mmu->printData(1025, time);
 	
 
 	//mmu->terminate(1025);

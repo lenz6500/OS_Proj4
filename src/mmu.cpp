@@ -75,25 +75,24 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 			std::cout << "MAX " << pageTable->getMaxPageSize() << "\n";
 		}
 		//Add entries for the table
-		for(i=0; i<=number_of_pages; i++)
+		for(i=0; i<=pageTable->getMaxPageSize(); i++)
 		{
 			pageTable->addEntry(pid, i);
 		}
+		_processes[index]->_max_page_size = pageTable->getMaxPageSize();
 		//Update entry up to maximum pages
-		
-		
-	}
-
-
-	/*int vd = 0;
-
-        	for (j = 0; j < _processes[index]->variables.size(); j++)
-        	{
-			std::cout << "pid "<<  _processes[index]->pid <<": ";
-			vd = _processes[index]->variables[j]->virtual_address;
-			std::cout << _processes[index]->variables[j]->name << ": "<< vd <<" RRRR\n";
-		}*/
-
+		for (i = 0; i < _processes.size(); i++)
+    		{
+			if( _processes[i]->_max_page_size < pageTable->getMaxPageSize() )
+			{
+				for( j=_processes[i]->_max_page_size+1; j<=pageTable->getMaxPageSize(); j++)
+				{
+					pageTable->addEntry(_processes[i]->pid, j);
+				}
+			}
+		}
+		//pageTable->updateEntryTable();
+	}//free space
 	return pid;
 }
 int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element )
@@ -151,10 +150,22 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable)
 {
 	int index = findProcess(pid);
+	if( index == -1 )
+	{ 
+		return -1; //error
+	}
 	int varAddr = findVariableAddr(var_name, index);
+	if( varAddr == -1 )
+	{ 
+		return -1; //error
+	}
 	int physAddr = pageTable->getPhysicalAddress(pid, varAddr);
 
 	int var_index = findVariableIndex(var_name, index);
+	if( var_index == -1 )
+	{ 
+		return -1; //error
+	}
 	int addtlOffset = 0;
 
 	for(int i=0; i<values.size(); i++)
@@ -249,9 +260,8 @@ int Mmu::findVariableAddr(std::string& varName, int index){
 void Mmu::print()
 {
     int i, j;
-    std::stringstream stream;
+    std::stringstream hex;
     char space = ' ';
-    std::string hex;
 
     std::cout << " PID  | Variable Name | Virtual Addr | Size" << std::endl;
     std::cout << "------+---------------+--------------+------------" << std::endl;
@@ -264,27 +274,21 @@ void Mmu::print()
 		{
 			break;
 		}
-		std::stringstream stream;
-		stream  << "0x"
+		hex.str(std::string());
+		hex  << "0x"
 			<< std::setfill('0')
 			<< std::setw(8)
+			<< std::uppercase
 			<< std::hex
 			<< _processes[i]->variables[j]->virtual_address;
-		hex = stream.str();
-		std::replace(hex.begin(), hex.end(), 'a', 'A');
-		std::replace(hex.begin(), hex.end(), 'b', 'B');
-		std::replace(hex.begin(), hex.end(), 'c', 'C');
-		std::replace(hex.begin(), hex.end(), 'd', 'D');
-		std::replace(hex.begin(), hex.end(), 'e', 'E');
-		std::replace(hex.begin(), hex.end(), 'f', 'F');
 
-	    std::cout << _processes[i]->pid
+	    	std::cout << _processes[i]->pid
 	              << std::string( 2, space )
 	    	      << "| " 
 		      << _processes[i]->variables[j]->name
 	              << std::string( 14 - _processes[i]->variables[j]->name.length(), space )
 		      << "|   "
-		      << hex
+		      << hex.str()
 	              << " |"
 	              << std::string( 11 - std::to_string(_processes[i]->variables[j]->size).length() , space )
 		      << _processes[i]->variables[j]->size << std:: endl;
@@ -303,17 +307,18 @@ void Mmu::printData(int pid, std::string& var_name)
 	int index = findProcess(pid);
 	int varAddr = findVariableAddr(var_name, index);
 	int var_index = findVariableIndex(var_name, index);
-
+	//std::cout << index << " "<< varAddr << " " << var_index<<std::endl;
+	if( index!=-1 && var_index!=-1 )
+	{
 	std::vector<std::string>::iterator it;
         std::vector<std::string> *data = &_processes[index]->variables[var_index]->data;
 	int size = 0;
 	
 	for(it = data->begin(); it != data->end() && size<4 ; it++)
 	{
-		//if( (*it).compare("")!=0 ){ std::cout << *it << ", "; }
-		std::cout << *it << ", ";
+		if( (*it).compare("")!=0 ){ std::cout << *it << ", "; }
+		//std::cout << *it << ", ";
 		size++;
-		
 	}
 	if( _processes[index]->variables[var_index]->data.size() >4 )
 	{
@@ -322,4 +327,5 @@ void Mmu::printData(int pid, std::string& var_name)
 			  << " items]";
 	}
 	std::cout << std::endl;
+	}
 }
