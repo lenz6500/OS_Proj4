@@ -47,8 +47,8 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
     	int page_offset = virtual_address & ((int)pow(2, _page_offset_bit)-1);
 
 
-	printf("%d is page number;\n", page_number);
-	printf("%d is page offset;\n", page_offset);
+	//printf("%d is page number;\n", page_number);
+	//printf("%d is page offset;\n", page_offset);
 
 	//printf("%d is page number2;\n", virtual_address % _page_size );
 	//printf("%d is page offset2;\n", virtual_address / _page_size );

@@ -60,8 +60,6 @@ int main(int argc, char **argv)
 
 	t = mmu->allocate( 1024, "data", "int", 2000 );
 	std::cout << t << "\n";
-        std::cout << t / page_size << " R\n";
-        std::cout << t % page_size << " R\n\n";
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1025, "pressure", "double", 1 );
@@ -69,8 +67,23 @@ int main(int argc, char **argv)
 	addr = page_table->getPhysicalAddress(1025, t);
     	mmu->print();
 
-	mmu->terminate(1025);
-    	mmu->print();
+
+	std::string name = "name";
+	std::vector<std::string> values;
+	values.push_back("l");
+	values.push_back("0");
+	values.push_back("c");
+	values.push_back("a");
+	values.push_back("t");
+	mmu->set( memory, 1024, name, 0, values, page_table);
+	mmu->printData(1024, name);
+	
+	//mmu->free( 1024, data , page_table );
+	//mmu->print();
+	
+
+	//mmu->terminate(1025);
+    	//mmu->print();
 
 	//page_table->print();
     //TEST:END
@@ -106,7 +119,7 @@ int main(int argc, char **argv)
 		{
 			values.push_back(spliter[j]);
 		}
-		//mmu->set(memory, stoi(spliter[1]), spliter[2], stoi(spliter[3]), values, page_table);
+		mmu->set(memory, stoi(spliter[1]), spliter[2], stoi(spliter[3]), values, page_table);
 	}
 	else if( spliter[0].compare("print")==0 && size>1 )
 	{
@@ -123,13 +136,13 @@ int main(int argc, char **argv)
 			mmu->printProcesses();
 		}
 		else{
-			//print <pid> <var_name>
+			mmu->printData(stoi(spliter[1]), spliter[2]);
 		}
 		
 	}
 	else if( spliter[0].compare("free")==0 )
 	{
-    	free(spliter[1], spliter[2], *page_table);
+    		mmu->free( stoi(spliter[1]), spliter[2], page_table);
 	}
 	else if( spliter[0].compare("terminate")==0 && size==2 )
 	{
