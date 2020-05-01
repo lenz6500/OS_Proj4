@@ -5,7 +5,6 @@ PageTable::PageTable(int page_size)
 {
     _page_size = page_size;
     frame_table = new std::vector<bool>();
-    _max_page_size = 0;
 }
 
 PageTable::~PageTable()
@@ -17,8 +16,6 @@ void PageTable::addEntry(uint32_t pid, int page_number)
     // Combination of pid and page number act as the key to look up frame number
     std::string entry = std::to_string(pid) + "|" + std::to_string(page_number);
     
-    //_table.insert( std::pair<std::string, int>("a", 1) );
-    //_table.insert( std::pair<std::string, int>("a", 0) );
     // Find free frame
     // TODO: implement this
     int frame = -1;
@@ -27,7 +24,6 @@ void PageTable::addEntry(uint32_t pid, int page_number)
     {
 	if( *it == false )
 	{ 
-		//std::cout << *it << std::endl;
 		frame++;
 	}
     }
@@ -63,10 +59,6 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
     }
 
     return address;
-}
-void PageTable::setMaxNumOfPage(int number_of_pages)
-{
-	_max_page_size = number_of_pages;
 }
 void PageTable::eraseEntry(uint32_t pid, int page_number)
 {

@@ -13,6 +13,7 @@ typedef struct Variable {
     int virtual_address;
     int size;
     std::vector<std::string> data;
+    std::vector<int> page_numbers;
 } Variable;
 
 
@@ -21,6 +22,7 @@ typedef struct Process {
     int p_virtual_address;//added, it tracks v_address in a process
     int _max_page_size;
     std::vector<Variable*> variables;
+    int _next_page;
 } Process;
 
 class Mmu {
@@ -38,7 +40,7 @@ public:
     void printData(int pid, std::string& varName);
     void printProcesses();
     uint32_t createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable);
-    int allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element );
+    int allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element, PageTable *pageTable);
     int set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable);
     int free(uint32_t pid, std::string& var_name, PageTable *pageTable);
     int terminate(uint32_t pid);
@@ -46,6 +48,7 @@ public:
     int findFreeVar(int pid_index);
     int findVariableIndex(std::string& varName, int index);
     int findVariableAddr(std::string& varName, int index);
+    void print2();
 };
 
 #endif // __MMU_H_
