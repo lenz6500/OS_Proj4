@@ -22,20 +22,26 @@ void PageTable::addEntry(uint32_t pid, int page_number)
     //_table.insert( std::pair<std::string, int>("a", 0) );
     // Find free frame
     // TODO: implement this
-
+    int frame = -1;
     std::vector<bool>::iterator it;
-	//std::cout << "SIZE: "<< frame_table->size() << std::endl;
-    
     for (it = frame_table->begin(); it != frame_table->end(); it++)
     {
-	if( *it == true )
+	if( *it == false )
 	{ 
 		//std::cout << *it << std::endl;
+		frame++;
 	}
     }
-    
-    int frame = frame_table->size();
-    frame_table->push_back(true);
+    //not found frame
+    if( frame == -1 )
+    {
+	frame = frame_table->size();
+	frame_table->push_back(true);
+    }
+    else
+    {
+	frame_table->insert( frame_table->begin()+frame, true);
+    }
     _table[entry] = frame;
 }
 
@@ -47,8 +53,8 @@ int PageTable::getPhysicalAddress(uint32_t pid, int virtual_address)
     	int page_offset = virtual_address & ((int)pow(2, _page_offset_bit)-1);
 
 
-	printf("%d is page number;\n", page_number);
-	printf("%d is page offset;\n", page_offset);
+	//printf("%d is page number;\n", page_number);
+	//printf("%d is page offset;\n", page_offset);
 
 	//printf("%d is page number2;\n", virtual_address % _page_size );
 	//printf("%d is page offset2;\n", virtual_address / _page_size );

@@ -39,38 +39,63 @@ int main(int argc, char **argv)
 	int t = 0;
 	int addr = 0;
 	t = mmu->allocate( 1024, "point_x", "int", 1 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1024, "point_y", "int", 1 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1025, "temperature", "double", 1 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1025, t);
 
 	t = mmu->allocate( 1024, "name", "char", 256 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1024, "time", "long", 2 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1024, "data", "int", 2000 );
-	std::cout << t << "\n";
-        std::cout << t / page_size << " R\n";
-        std::cout << t % page_size << " R\n\n";
+
 	addr = page_table->getPhysicalAddress(1024, t);
 
 	t = mmu->allocate( 1025, "pressure", "double", 1 );
-	std::cout << t << "\n";
+
 	addr = page_table->getPhysicalAddress(1025, t);
     	mmu->print();
 
-	mmu->terminate(1025);
-    	mmu->print();
+	std::string name = "name";
+	std::vector<std::string> values;
+	values.push_back("l");
+	values.push_back("0");
+	values.push_back("c");
+	values.push_back("a");
+	values.push_back("t");
+	mmu->set( memory, 1024, name, 0, values, page_table);
+	mmu->printData(1024, name);
+	//mmu->free( 1024, data , page_table );
+	//mmu->print();
+
+	std::string time = "time";
+	std::vector<std::string> values2;
+	values2.push_back("91235684");
+	mmu->set( memory, 1024, time, 0, values2, page_table);
+	std::vector<std::string> values3;
+	values3.push_back("35764365486");
+	mmu->set( memory, 1024, time, 1, values3, page_table);
+	mmu->printData(1024, time);
+
+	/*std::vector<std::string> values3;
+	values.push_back("3214567");
+	mmu->set( memory, 1025, time, 1, values3, page_table);*/
+	//mmu->printData(1025, time);
+	
+
+	//mmu->terminate(1025);
+    	//mmu->print();
 
 	//page_table->print();
     //TEST:END
@@ -106,7 +131,7 @@ int main(int argc, char **argv)
 		{
 			values.push_back(spliter[j]);
 		}
-		//mmu->set(memory, stoi(spliter[1]), spliter[2], stoi(spliter[3]), values, page_table);
+		mmu->set(memory, stoi(spliter[1]), spliter[2], stoi(spliter[3]), values, page_table);
 	}
 	else if( spliter[0].compare("print")==0 && size>1 )
 	{
@@ -123,7 +148,7 @@ int main(int argc, char **argv)
 			mmu->printProcesses();
 		}
 		else{
-			//print <pid> <var_name>
+			mmu->printData(stoi(spliter[1]), spliter[2]);
 		}
 		
 	}
@@ -131,7 +156,8 @@ int main(int argc, char **argv)
 	{
 		int pid = atoi(spliter[1].c_str());
 		std::string var_name = spliter[2];
-    	free(pid, var_name);
+    	mmu->free(pid, var_name);
+    		//mmu->free( stoi(spliter[1]), spliter[2], page_table);
 	}
 	else if( spliter[0].compare("terminate")==0 && size==2 )
 	{

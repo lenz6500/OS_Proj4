@@ -12,13 +12,14 @@ typedef struct Variable {
     std::string name;
     int virtual_address;
     int size;
-    std::vector<std::string*> data;
+    std::vector<std::string> data;
 } Variable;
 
 
 typedef struct Process {
     uint32_t pid;
     int p_virtual_address;//added, it tracks v_address in a process
+    int _max_page_size;
     std::vector<Variable*> variables;
 } Process;
 
@@ -34,6 +35,7 @@ public:
 
     uint32_t createProcess();
     void print();
+    void printData(int pid, std::string& varName);
     void printProcesses();
     uint32_t createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable);
     int allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element );
