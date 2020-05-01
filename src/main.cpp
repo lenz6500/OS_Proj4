@@ -157,7 +157,10 @@ int main(int argc, char **argv)
 	}
 	else if( spliter[0].compare("free")==0 )
 	{
-    		mmu->free( stoi(spliter[1]), spliter[2], page_table);
+		int pid = atoi(spliter[1].c_str());
+		std::string var_name = spliter[2];
+    	mmu->free(pid, var_name);
+    		//mmu->free( stoi(spliter[1]), spliter[2], page_table);
 	}
 	else if( spliter[0].compare("terminate")==0 && size==2 )
 	{
