@@ -30,7 +30,7 @@ uint32_t Mmu::createProcess()
 }
 uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable)
 {
-	//
+	//May need to check enough space to create a process.
     	int i, j, max_size, number_of_pages;
 	bool found = false;
 	uint32_t pid = createProcess();
