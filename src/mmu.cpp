@@ -181,8 +181,7 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 	return 0;
 }
 
-int Mmu::free(uint32_t pid, std::string& var_name)
-
+int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable)
 {
 	int index = findProcess(pid);
 	if( index == -1 )
