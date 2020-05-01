@@ -30,6 +30,7 @@ uint32_t Mmu::createProcess()
 }
 uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable)
 {
+	//
     	int i, j, max_size, number_of_pages;
 	bool found = false;
 	uint32_t pid = createProcess();
@@ -72,7 +73,6 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 		if( number_of_pages > pageTable->getMaxPageSize() )
 		{
 			pageTable->setMaxNumOfPage(number_of_pages);
-			std::cout << "MAX " << pageTable->getMaxPageSize() << "\n";
 		}
 		//Add entries for the table
 		for(i=0; i<=pageTable->getMaxPageSize(); i++)
@@ -88,10 +88,10 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 				for( j=_processes[i]->_max_page_size+1; j<=pageTable->getMaxPageSize(); j++)
 				{
 					pageTable->addEntry(_processes[i]->pid, j);
+					_processes[i]->_max_page_size = pageTable->getMaxPageSize();
 				}
 			}
 		}
-		//pageTable->updateEntryTable();
 	}//free space
 	return pid;
 }
@@ -133,10 +133,14 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 		_processes[index]->variables[var_index]->size = 8*num_element;
 	}
     
-	_processes[index]->variables[var_index]->data.resize(num_element); //Resize to how many elements supposed to be able to hold.
+	_processes[index]->variables[var_index]->data.resize(num_element);
+	//Resize to how many elements supposed to be able to hold.
 	
 	virtual_addr = _processes[index]->p_virtual_address;
 	_processes[index]->p_virtual_address +=  _processes[index]->variables[var_index]->size;
+
+	//Track available space
+	_max_size = _max_size - _processes[index]->p_virtual_address;
 
 	//Add and Track FREE SPACE
 	Variable *var = new Variable();
@@ -189,10 +193,14 @@ int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable)
 	{
 		return -1; //error
 	}
+
 	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
 	_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
 	_processes[index]->variables[var_index]->size = 0; //No size allocated.
-
+	
+	//not sure this is correct way to delete entry
+	pageTable->eraseEntry( pid, _processes[index]->_max_page_size );
+	_processes[index]->_max_page_size--;
 	return 0;
 }
 int Mmu::terminate(uint32_t pid)
@@ -307,25 +315,25 @@ void Mmu::printData(int pid, std::string& var_name)
 	int index = findProcess(pid);
 	int varAddr = findVariableAddr(var_name, index);
 	int var_index = findVariableIndex(var_name, index);
-	//std::cout << index << " "<< varAddr << " " << var_index<<std::endl;
+
 	if( index!=-1 && var_index!=-1 )
 	{
-	std::vector<std::string>::iterator it;
-        std::vector<std::string> *data = &_processes[index]->variables[var_index]->data;
-	int size = 0;
+		std::vector<std::string>::iterator it;
+        	std::vector<std::string> *data = &_processes[index]->variables[var_index]->data;
+		int size = 0;
 	
-	for(it = data->begin(); it != data->end() && size<4 ; it++)
-	{
-		if( (*it).compare("")!=0 ){ std::cout << *it << ", "; }
-		//std::cout << *it << ", ";
-		size++;
-	}
-	if( _processes[index]->variables[var_index]->data.size() >4 )
-	{
-		std::cout << "... [" 
-			  << _processes[index]->variables[var_index]->data.size()
-			  << " items]";
-	}
-	std::cout << std::endl;
+		for(it = data->begin(); it != data->end() && size<4 ; it++)
+		{
+			if( (*it).compare("")!=0 ){ std::cout << *it << ", "; }
+			//std::cout << *it << ", ";
+			size++;
+		}
+		if( _processes[index]->variables[var_index]->data.size() >4 )
+		{
+			std::cout << "... [" 
+				  << _processes[index]->variables[var_index]->data.size()
+				  << " items]";
+		}
+		std::cout << std::endl;
 	}
 }

@@ -76,8 +76,6 @@ int main(int argc, char **argv)
 	values.push_back("t");
 	mmu->set( memory, 1024, name, 0, values, page_table);
 	mmu->printData(1024, name);
-	//mmu->free( 1024, data , page_table );
-	//mmu->print();
 
 	std::string time = "time";
 	std::vector<std::string> values2;
@@ -87,6 +85,11 @@ int main(int argc, char **argv)
 	values3.push_back("35764365486");
 	mmu->set( memory, 1024, time, 1, values3, page_table);
 	mmu->printData(1024, time);
+
+	std::string data = "data";
+	mmu->free( 1024, data , page_table );
+	mmu->print();
+	page_table->print();
 
 	/*std::vector<std::string> values3;
 	values.push_back("3214567");

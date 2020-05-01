@@ -22,6 +22,7 @@ public:
     int getPhysicalAddress(uint32_t pid, int virtual_address);
     void print();
     void setMaxNumOfPage(int number_of_pages);
+    void eraseEntry(uint32_t pid, int page_number);
     int getPageSize(){ return _page_size; }
     int getMaxPageSize(){ return _max_page_size; }
 };
