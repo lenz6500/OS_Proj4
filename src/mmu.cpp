@@ -31,8 +31,7 @@ uint32_t Mmu::createProcess()
 uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable)
 {
 	//May need to check enough space to create a process.
-    	int i, j, max_size, number_of_pages;
-	bool found = false;
+    	int i, j, number_of_pages;
 	uint32_t pid = createProcess();
 	int index = findProcess(pid);//no error
 
@@ -42,7 +41,7 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 		_processes[index]->variables[0]->virtual_address = _processes[index]->p_virtual_address;
 		_processes[index]->variables[0]->size = text_size;
 
-		_processes[index]->p_virtual_address = _processes[index]->p_virtual_address + text_size;
+		_processes[index]->p_virtual_address +=  text_size;
 
 		Variable *globals = new Variable();
 		globals->name = "<GLOBALS>";
@@ -50,7 +49,7 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
     		globals->size = data_size;
 		_processes[index]->variables.push_back(globals);
 
-		_processes[index]->p_virtual_address = _processes[index]->p_virtual_address + globals->size;
+		_processes[index]->p_virtual_address +=  globals->size;
 
 		Variable *stack = new Variable();
 		stack->name = "<STACK>";
@@ -58,8 +57,10 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
     		stack->size = 65536;
 		_processes[index]->variables.push_back(stack);
 
-		_processes[index]->p_virtual_address = _processes[index]->p_virtual_address + stack->size;
-
+		_processes[index]->p_virtual_address +=  stack->size;
+		
+		_max_size -= _processes[index]->p_virtual_address;
+		std::cout <<"MAX size"<<_max_size<<"\n";
     		Variable *var = new Variable();
     		var->name = "<FREE_SPACE>";
     		var->virtual_address = -1;
