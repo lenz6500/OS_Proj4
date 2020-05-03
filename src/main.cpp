@@ -195,7 +195,6 @@ int main(int argc, char **argv)
     std::getline (std::cin, command);
     while (command != "exit") {
         // Handle command
-        // TODO: implement this!
 	spliter = splitString(command, ' ');
 	size = spliter.size();
 	if( spliter[0].compare("create")==0 && size==3 )
@@ -244,7 +243,6 @@ int main(int argc, char **argv)
 			var_name = spliter[2];	
 			mmu->printData(pid, var_name, page_table, memory);
 		}
-		
 	}
 	else if( spliter[0].compare("free")==0 && size==3 )
 	{

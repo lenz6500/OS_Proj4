@@ -30,6 +30,7 @@ class Mmu {
 private:
     uint32_t _next_pid;
     int _max_size;
+	int _total_allocated;
     std::vector<Process*> _processes;
 
 public:
