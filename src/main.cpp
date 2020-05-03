@@ -26,13 +26,13 @@ int main(int argc, char **argv)
     //Create MMU and PageTable
     Mmu *mmu = new Mmu(67108864);
     PageTable *page_table = new PageTable(page_size);
-    int pid, number_of_pages;
+    int  number_of_pages;
 
     //TEST:BEGIN
-    pid = mmu->createNewProcess(5992,564,page_table);
+    mmu->createNewProcess(5992,564,page_table);
 	page_table->print();
 
-    pid = mmu->createNewProcess(14788,296,page_table);
+    mmu->createNewProcess(14788,296,page_table);
 	page_table->print();
 
     mmu->print();
@@ -102,6 +102,15 @@ int main(int argc, char **argv)
 	address = mmu->findVariableAddr(pressure, index);
 	phy_address = page_table->getPhysicalAddress(1025, address);
 	std::cout << "pressure vd: " <<  address << "  phy address: " << phy_address <<"\n";
+
+
+	//page_table->print();
+	
+	std::string temp = "123";
+	uint8_t po = atoi(temp.c_str());
+	std::cout<< po << "\n";
+	memory[4] = po;
+	std::cout<< memory[4] << "\n";
 	
 
 	/*std::string name = "name";
@@ -144,7 +153,11 @@ int main(int argc, char **argv)
 
     std::vector<std::string> spliter;
     
-    int size = 0;
+    int size = 0, text_size = 0, data_size = 0, num_of_elements = 0, offset = 0;
+    uint32_t pid = 0;
+    std::string var_name;
+    std::string data_type;
+    
     // Prompt loop
     std::string command;
     std::cout << "> ";
@@ -156,15 +169,18 @@ int main(int argc, char **argv)
 	size = spliter.size();
 	if( spliter[0].compare("create")==0 && size==3 )
 	{
-		std::cout << mmu->createNewProcess( std::stoi(spliter[1]), std::stoi(spliter[2]), page_table)
-			  <<"\n";
+		text_size = std::stoi(spliter[1]);
+		data_size = std::stoi(spliter[2]);
+		std::cout << mmu->createNewProcess( text_size, data_size, page_table) << std::endl;
 		
 	}
 	else if( spliter[0].compare("allocate")==0 && size==5 )
 	{
-		std::cout << mmu->allocate( static_cast<uint32_t>(std::stoul(spliter[1])), 
-						spliter[2], spliter[3], std::stoi(spliter[4]), page_table )
-			  << "\n";
+		pid = static_cast<uint32_t>(std::stoul(spliter[1]));
+		var_name = spliter[2];
+		data_type = spliter[3];
+		num_of_elements = std::stoi(spliter[4]);
+		std::cout << mmu->allocate( pid, var_name, data_type, num_of_elements, page_table ) << std::endl;
 	}
 	else if( spliter[0].compare("set")==0 && size>4 )
 	{
@@ -173,7 +189,10 @@ int main(int argc, char **argv)
 		{
 			values.push_back(spliter[j]);
 		}
-		mmu->set(memory, stoi(spliter[1]), spliter[2], stoi(spliter[3]), values, page_table);
+		pid = static_cast<uint32_t>(std::stoul(spliter[1]));
+		var_name = spliter[2];
+		offset = stoi(spliter[3]);
+		mmu->set(memory, pid, var_name, offset, values, page_table);
 	}
 	else if( spliter[0].compare("print")==0 && size>1 )
 	{
@@ -190,20 +209,22 @@ int main(int argc, char **argv)
 			mmu->printProcesses();
 		}
 		else{
-			mmu->printData(stoi(spliter[1]), spliter[2]);
+			pid = atoi(spliter[1].c_str());
+			var_name = spliter[2];	
+			mmu->printData(pid, var_name);
 		}
 		
 	}
 	else if( spliter[0].compare("free")==0 )
 	{
-		int pid = atoi(spliter[1].c_str());
-		std::string var_name = spliter[2];
+		pid = atoi(spliter[1].c_str());
+		var_name = spliter[2];
     		mmu->free(pid, var_name, page_table);
-    		//mmu->free( stoi(spliter[1]), spliter[2], page_table);
 	}
 	else if( spliter[0].compare("terminate")==0 && size==2 )
 	{
-		mmu->terminate( std::stoi(spliter[1]) );
+		pid = atoi(spliter[1].c_str());
+		mmu->terminate( pid );
 	}
 	else
 	{

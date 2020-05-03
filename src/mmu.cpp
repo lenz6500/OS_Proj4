@@ -135,9 +135,7 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 	//Resize to how many elements supposed to be able to hold.
 	
 	virtual_addr = _processes[index]->p_virtual_address;
-	
 	_processes[index]->p_virtual_address +=  _processes[index]->variables[var_index]->size;
-
 
 	int number_of_pages = _processes[index]->p_virtual_address / pageTable->getPageSize();
 	bool lop = false;

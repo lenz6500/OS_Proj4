@@ -19,8 +19,7 @@ typedef struct Variable {
 
 typedef struct Process {
     uint32_t pid;
-    int p_virtual_address;//added, it tracks v_address in a process
-    int _max_page_size;
+    int p_virtual_address;
     std::vector<Variable*> variables;
     int _next_page;
 } Process;

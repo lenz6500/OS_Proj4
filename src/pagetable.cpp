@@ -25,6 +25,7 @@ void PageTable::addEntry(uint32_t pid, int page_number)
 	if( *it == false )
 	{ 
 		frame++;
+		break;
 	}
     }
     //not found frame
