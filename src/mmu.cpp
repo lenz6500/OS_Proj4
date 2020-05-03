@@ -96,15 +96,10 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element, PageTable *pageTable)
 {
 	int index = findProcess(pid);
-	if( index == -1 )
-	{ 
-		return -1; //error
-	}
+	if( index == -1 ){ return -1; }//error
+
 	int var_index = findFreeVar(index);
-	if( var_index == -1 )
-	{
-		return -1; //error
-	}
+	if( var_index == -1 ){ return -1; }//error
 
 	//Need to check if FREE SPACE has enough space for the input size.
 
@@ -113,25 +108,12 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 
 	int virtual_addr = 0;
 
+	_processes[index]->variables[var_index]->data_type = data_type;
 	//set size
-	if( data_type.compare("char") == 0 )
-	{ 
-		_processes[index]->variables[var_index]->size = num_element;
-	}
-	else if( data_type.compare("short") == 0 )
-	{ 
-		_processes[index]->variables[var_index]->size = 2*num_element;
-	}
-	else if( data_type.compare("int") == 0 || data_type.compare("float") == 0 )
-	{ 
-		_processes[index]->variables[var_index]->size = 4*num_element;
-	}
-	else if( data_type.compare("long") == 0 || data_type.compare("double") == 0 )
-	{ 
-		_processes[index]->variables[var_index]->size = 8*num_element;
-	}
+	int data_size = getDataSize( _processes[index]->variables[var_index]->data_type );
+	_processes[index]->variables[var_index]->size = data_size * num_element;
     
-	_processes[index]->variables[var_index]->data.resize(num_element);
+	//_processes[index]->variables[var_index]->data.resize(num_element);
 	//Resize to how many elements supposed to be able to hold.
 	
 	virtual_addr = _processes[index]->p_virtual_address;
@@ -148,7 +130,7 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 	}
 	if( number_of_pages < _processes[index]->_next_page && !lop)
 	{ 
-		_processes[index]->variables[var_index]->page_numbers.push_back(number_of_pages); 
+		_processes[index]->variables[var_index]->page_numbers.push_back(number_of_pages);
 	}
 	//Track available space
 	_max_size = _max_size - _processes[index]->p_virtual_address;
@@ -165,78 +147,107 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable)
 {
 	int index = findProcess(pid);
-	if( index == -1 )
-	{ 
-		return -1; //error
-	}
+	if( index == -1 ){ return -1; }//error
+
 	int varAddr = findVariableAddr(var_name, index);
-	if( varAddr == -1 )
-	{ 
-		return -1; //error
-	}
+	if( varAddr == -1 ){ return -1; }//error
+
 	int physAddr = pageTable->getPhysicalAddress(pid, varAddr);
 
 	int var_index = findVariableIndex(var_name, index);
-	if( var_index == -1 )
-	{ 
-		return -1; //error
-	}
-	int addtlOffset = 0;
+	if( var_index == -1 ){ return -1; }//error
 
+	int addtlOffset = 0, i=0;
+	std::string data_type = _processes[index]->variables[var_index]->data_type;
 	
-	uint8_t *pointer;
-	for(int i=0; i<values.size(); i++)
+
+	if( data_type.compare("char") == 0 )
 	{
-		std::vector<uint8_t> container( values[i].begin(), values[i].end() );
-		//pointer = &container[0];
-		_processes[index]->variables[var_index]->data[offset + addtlOffset] = values[i];
-
-
-		pointer = (uint8_t*)(&values[i]);
-		memory[physAddr] = *pointer;
-
-
-
-		//memory[physAddr] = (uint8_t*)(values[i].c_str());
-		//Still unsure how to exactly get the it to fit in here.
-		addtlOffset++;
+		std::vector<char> transfer;
+		for(i=0; i<values.size(); i++){ transfer.push_back( *values[i].begin() ); }
+		std::memcpy( &memory[physAddr+offset], transfer.data(), transfer.size() );
 	}
+	else if( data_type.compare("short") == 0 )
+	{
+		std::vector<short> transfer;
+		for(i=0; i<values.size(); i++){ transfer.push_back( (short)std::stoi(values[i]) ); }
+		std::memcpy( &memory[physAddr+offset*2], transfer.data(), 2*transfer.size() );
+	}
+	else if( data_type.compare("int") == 0 )
+	{
+		std::vector<int> transfer;
+		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoi(values[i]) ); }
+		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
+	}
+	else if( data_type.compare("float") == 0 )
+	{
+		std::vector<float> transfer;
+		for(i=0; i<values.size(); i++){ transfer.push_back( std::stof(values[i]) ); }
+		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
+	}
+	else if( data_type.compare("long") == 0 )
+	{
+		std::vector<long> transfer;
+		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoll(values[i]) ); }
+		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
+	}
+	else if( data_type.compare("double") == 0 )
+	{
+		std::vector<double> transfer;
+		for(i=0; i<values.size(); i++){ transfer.push_back( std::stod(values[i]) ); }
+		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
+	}
+
+	//track data in the memory.
+	//for(int i=0; i<values.size(); i++)
+	//{
+		//_processes[index]->variables[var_index]->data[offset + addtlOffset] = values[i];
+		//Still unsure how to exactly get the it to fit in here.
+	//	addtlOffset++;
+	//}
 	return 0;
 }
 
-int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable)
+int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable, uint8_t *memory)
 {
 	int index = findProcess(pid);
-	if( index == -1 )
-	{ 
-		return -1; //error
-	}
+	if( index == -1 ){ return -1; }//error
+
 	int var_index = findVariableIndex(var_name, index);
-	if( var_index == -1 )
+	if( var_index == -1 ){ return -1; }//error
+
+	int varAddr = findVariableAddr(var_name, index);
+
+	int physAddr = pageTable->getPhysicalAddress(pid, varAddr);
+	std::string data_type = _processes[index]->variables[var_index]->data_type;
+	int data_size = getDataSize( data_type );
+	int num_of_elements = _processes[index]->variables[var_index]->size / data_size;
+
+
+	for(int offset=0; offset<num_of_elements; offset++){ memory[physAddr+offset*data_size] = 0; }//reset values
+
+	//this is going to delete other varialbes located in same allocation, is that ok?
+	int page_number = 0;
+	for(int j=0; j<_processes[index]->variables[var_index]->page_numbers.size(); j++)
 	{
-		return -1; //error
+		page_number = _processes[index]->variables[var_index]->page_numbers[j];
+	//	std::cout <<"PAGE NUM: "<< _processes[index]->variables[var_index]->page_number <<"\n";
+		pageTable->eraseEntry( pid, page_number );
+		//_processes[index]->_next_page--;
 	}
+	//std::cout <<"PAGE NUM: "<< _processes[index]->variables[var_index]->page_number <<"\n";
+	//pageTable->eraseEntry( pid, _processes[index]->variables[var_index]->page_number );
 
 	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
 	_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
 	_processes[index]->variables[var_index]->size = 0; //No size allocated.
-	
-	//this is going to delete other varialbes located in same allocation, is that ok?
-	for(int j=0; j<_processes[index]->variables[var_index]->page_numbers.size(); j++)
-	{
-		pageTable->eraseEntry( pid,  j );
-		//_processes[index]->_next_page--;
-	}
 
 	return 0;
 }
 int Mmu::terminate(uint32_t pid)
 {
 	int pid_index = findProcess(pid);
-	if( pid_index == -1 )
-	{ 
-		return -1; //error
-	}
+	if( pid_index == -1 ){ return -1; }//error
 
 	_processes[pid_index]->variables.clear();//clear all varialbes
 	//not sure
@@ -248,12 +259,11 @@ int Mmu::terminate(uint32_t pid)
 
 int Mmu::findProcess(uint32_t pid)
 {
-    	for (int i = 0; i < _processes.size(); i++)
-    	{
+    	for (int i = 0; i < _processes.size(); i++){ 
 		if( _processes[i]->pid == pid )
 		{ 
-			return i;
-		}
+			return i; 
+		} 
 	}
 	return -1;
 }
@@ -273,8 +283,9 @@ int Mmu::findVariableIndex(std::string& varName, int index){
 
 	for(int i = 0; i < _processes[index]->variables.size(); i ++){
 
-		if( _processes[index]->variables[i]->name.compare(varName) == 0){
-			return i;
+		if( _processes[index]->variables[i]->name.compare(varName) == 0)
+		{ 
+			return i; 
 		}
 	}
 	return -1;
@@ -284,27 +295,12 @@ int Mmu::findVariableAddr(std::string& varName, int index){
 
 	for(int i = 0; i < _processes[index]->variables.size(); i ++){
 
-		if( _processes[index]->variables[i]->name.compare(varName) == 0){
-			
+		if( _processes[index]->variables[i]->name.compare(varName) == 0)
+		{
 			return _processes[index]->variables[i]->virtual_address;
 		}
 	}
 	return -1;
-}
-void Mmu::print2()//just to chekc,
-{
-	int i, j, k;
-    for (i = 0; i < _processes.size(); i++)
-    {
-        for (j = 0; j < _processes[i]->variables.size(); j++)
-        {
-		for(k=0; k<_processes[i]->variables[j]->page_numbers.size(); k++)
-		{
-			std::cout << _processes[i]->pid <<" "<< _processes[i]->variables[j]->name
-					<< " : "<<_processes[i]->variables[j]->page_numbers[k] <<"\n";
-		}
-	}
-    }
 }
 void Mmu::print()
 {
@@ -346,35 +342,88 @@ void Mmu::print()
 }
 void Mmu::printProcesses()
 {
-    for (int i = 0; i < _processes.size(); i++)
-    {
-	std::cout << _processes[i]->pid << std:: endl;
-    }
+    for (int i = 0; i < _processes.size(); i++){ std::cout << _processes[i]->pid << std:: endl; }
 }
-void Mmu::printData(int pid, std::string& var_name)
+void Mmu::printData(int pid, std::string& var_name, PageTable *pageTable, uint8_t *memory)
 {
 	int index = findProcess(pid);
-	int varAddr = findVariableAddr(var_name, index);
+	if( index==-1 ){ return; }
 	int var_index = findVariableIndex(var_name, index);
+	if( var_index==-1 ){ return; }
+	int varAddr = findVariableAddr(var_name, index);
 
-	if( index!=-1 && var_index!=-1 )
+	int physAddr = pageTable->getPhysicalAddress(pid, varAddr);
+	std::string data_type = _processes[index]->variables[var_index]->data_type;
+	int data_size = getDataSize( data_type );
+	int num_of_elements = _processes[index]->variables[var_index]->size / data_size;
+	int limit = 0, i = 0;
+	if( data_type.compare("char") == 0 )
 	{
-		std::vector<std::string>::iterator it;
-        	std::vector<std::string> *data = &_processes[index]->variables[var_index]->data;
-		int size = 0;
-	
-		for(it = data->begin(); it != data->end() && size<4 ; it++)
-		{
-			if( (*it).compare("")!=0 ){ std::cout << *it << ", "; }
-			//std::cout << *it << ", ";
-			size++;
-		}
-		if( _processes[index]->variables[var_index]->data.size() >4 )
-		{
-			std::cout << "... [" 
-				  << _processes[index]->variables[var_index]->data.size()
-				  << " items]";
-		}
-		std::cout << std::endl;
+		char *elements;
+		elements = (char *)malloc(sizeof(char)*num_of_elements);
+		std::memcpy(elements, &memory[physAddr], _processes[index]->variables[var_index]->size);
+
+		for( i=0; i<num_of_elements && limit<4; i++){ std::cout << elements[i] << ", "; limit++; }
+		if( num_of_elements >= 4){ std::cout << "... [" << num_of_elements << " items]"; }
+		delete elements;
 	}
+	else if( data_type.compare("short") == 0 )
+	{
+		short *elements;
+		elements = (short *)malloc(sizeof(short)*num_of_elements);
+		std::memcpy(elements, &memory[physAddr], _processes[index]->variables[var_index]->size);
+
+		for( i=0; i<num_of_elements && limit<4; i++){ std::cout << elements[i] << ", "; limit++; }
+		if( num_of_elements >= 4){ std::cout << "... [" << num_of_elements << " items]"; }
+		delete elements;
+	}
+	else if( data_type.compare("int") == 0 )
+	{
+		int *elements;
+		elements = (int *)malloc(sizeof(int)*num_of_elements);
+		std::memcpy(elements, &memory[physAddr], _processes[index]->variables[var_index]->size);
+
+		for( i=0; i<num_of_elements && limit<4; i++){ std::cout << elements[i] << ", "; limit++; }
+		if( num_of_elements >= 4){ std::cout << "... [" << num_of_elements << " items]"; }
+		delete elements;
+	}
+	else if( data_type.compare("float") == 0 )
+	{
+		float *elements;
+		elements = (float *)malloc(sizeof(float)*num_of_elements);
+		std::memcpy(elements, &memory[physAddr], _processes[index]->variables[var_index]->size);
+
+		for( i=0; i<num_of_elements && limit<4; i++){ std::cout << elements[i] << ", "; limit++; }
+		if( num_of_elements >= 4){ std::cout << "... [" << num_of_elements << " items]"; }
+		delete elements;
+	}
+	else if( data_type.compare("long") == 0 )
+	{
+		long *elements;
+		elements = (long *)malloc(sizeof(long)*num_of_elements);
+		std::memcpy(elements, &memory[physAddr], _processes[index]->variables[var_index]->size);
+
+		for( i=0; i<num_of_elements && limit<4; i++){ std::cout << elements[i] << ", "; limit++; }
+		if( num_of_elements >= 4){ std::cout << "... [" << num_of_elements << " items]"; }
+		delete elements;
+	}
+	else if( data_type.compare("double") == 0 )
+	{
+		double *elements;
+		elements = (double *)malloc(sizeof(double)*num_of_elements);
+		std::memcpy(elements, &memory[physAddr], _processes[index]->variables[var_index]->size);
+
+		for( i=0; i<num_of_elements && limit<4; i++){ std::cout << elements[i] << ", "; limit++; }
+		if( num_of_elements >= 4){ std::cout << "... [" << num_of_elements << " items]"; }
+		delete elements;
+	}
+	std::cout << std::endl;//std::cout << (char)memory[physAddr+i*data_size] << ", ";//*data_size
+}
+int Mmu::getDataSize(std::string& data_type)
+{
+	if( data_type.compare("char") == 0 ){ return 1; }
+	else if( data_type.compare("short") == 0 ){ return 2; }
+	else if( data_type.compare("int") == 0 || data_type.compare("float") == 0 ){ return 4; }
+	else if( data_type.compare("long") == 0 || data_type.compare("double") == 0 ){ return 8; }
+	return -1;
 }
