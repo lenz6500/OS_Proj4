@@ -32,6 +32,8 @@ uint32_t Mmu::createProcess()
 }
 uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable)
 {
+
+	//Check if there's enough space to create the new process.
 	if(_total_allocated + text_size + data_size > _max_size || text_size > _max_size || data_size > _max_size){
 		printf("This would exceed the maximum amount of ram available.\n");
 		return -1;
@@ -39,7 +41,7 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 
 		_total_allocated = _total_allocated + text_size + data_size;
 
-		//May need to check enough space to create a process.
+		
 		int i, j, number_of_pages;
 		uint32_t pid = createProcess();
 		int index = findProcess(pid);//no error
