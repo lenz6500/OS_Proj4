@@ -9,8 +9,6 @@
 class PageTable {
 private:
     int _page_size;
-    int _max_page_size;
-    int _page_offset_bit;//page offset
     std::map<std::string, int> _table;
     std::vector<bool> *frame_table;
 
@@ -24,8 +22,7 @@ public:
     void setMaxNumOfPage(int number_of_pages);
     void eraseEntry(uint32_t pid, int page_number);
     int getPageSize(){ return _page_size; }
-    int getMaxPageSize(){ return _max_page_size; }
-	void updateEntryTable();
+
 };
 
 #endif // __PAGETABLE_H_

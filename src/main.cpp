@@ -38,36 +38,73 @@ int main(int argc, char **argv)
     mmu->print();
 	int t = 0;
 	int addr = 0;
-	t = mmu->allocate( 1024, "point_x", "int", 1 );
+	t = mmu->allocate( 1024, "point_x", "int", 1, page_table );
 
 	addr = page_table->getPhysicalAddress(1024, t);
 
-	t = mmu->allocate( 1024, "point_y", "int", 1 );
+	t = mmu->allocate( 1024, "point_y", "int", 1, page_table );
 
 	addr = page_table->getPhysicalAddress(1024, t);
 
-	t = mmu->allocate( 1025, "temperature", "double", 1 );
+	t = mmu->allocate( 1025, "temperature", "double", 1, page_table );
 
 	addr = page_table->getPhysicalAddress(1025, t);
 
-	t = mmu->allocate( 1024, "name", "char", 256 );
+	t = mmu->allocate( 1024, "name", "char", 256, page_table );
 
 	addr = page_table->getPhysicalAddress(1024, t);
 
-	t = mmu->allocate( 1024, "time", "long", 2 );
+	t = mmu->allocate( 1024, "time", "long", 2, page_table );
 
 	addr = page_table->getPhysicalAddress(1024, t);
 
-	t = mmu->allocate( 1024, "data", "int", 2000 );
+	t = mmu->allocate( 1024, "data", "int", 2000, page_table );
 
 	addr = page_table->getPhysicalAddress(1024, t);
 
-	t = mmu->allocate( 1025, "pressure", "double", 1 );
+	t = mmu->allocate( 1025, "pressure", "double", 1, page_table );
 
 	addr = page_table->getPhysicalAddress(1025, t);
     	mmu->print();
+        mmu->print2();
 
-	std::string name = "name";
+	std::string data2 = "data";
+	std::string time = "time";
+	std::string x = "point_x";
+	int index = mmu->findProcess(1024);
+
+
+	int address = mmu->findVariableAddr(x, index);
+	int phy_address = page_table->getPhysicalAddress(1024, address);
+	std::cout << "point_x vd: " <<  address << "  phy address: " << phy_address <<"\n";
+
+
+	address = mmu->findVariableAddr(time, index);
+	phy_address = page_table->getPhysicalAddress(1024, address);
+	std::cout << "time vd: " <<  address << "  phy address: " << phy_address <<"\n";
+
+
+	address = mmu->findVariableAddr(data2, index);
+	phy_address = page_table->getPhysicalAddress(1024, address);
+	std::cout << "data vd: " <<  address << "  phy address: " << phy_address <<"\n";
+
+
+	std::string temperature = "temperature";
+	std::string pressure = "pressure";
+	index = mmu->findProcess(1025);
+
+
+	address = mmu->findVariableAddr(temperature, index);
+	phy_address = page_table->getPhysicalAddress(1025, address);
+	std::cout << "temperature vd: " <<  address << "  phy address: " << phy_address <<"\n";
+
+
+	address = mmu->findVariableAddr(pressure, index);
+	phy_address = page_table->getPhysicalAddress(1025, address);
+	std::cout << "pressure vd: " <<  address << "  phy address: " << phy_address <<"\n";
+	
+
+	/*std::string name = "name";
 	std::vector<std::string> values;
 	values.push_back("l");
 	values.push_back("0");
@@ -75,9 +112,9 @@ int main(int argc, char **argv)
 	values.push_back("a");
 	values.push_back("t");
 	mmu->set( memory, 1024, name, 0, values, page_table);
-	mmu->printData(1024, name);
+	mmu->printData(1024, name);*/
 
-	std::string time = "time";
+	/*std::string time = "time";
 	std::vector<std::string> values2;
 	values2.push_back("91235684");
 	mmu->set( memory, 1024, time, 0, values2, page_table);
@@ -90,6 +127,8 @@ int main(int argc, char **argv)
 	mmu->free( 1024, data , page_table );
 	mmu->print();
 	page_table->print();
+
+	mmu->print2();*/
 
 	/*std::vector<std::string> values3;
 	values.push_back("3214567");
@@ -124,7 +163,7 @@ int main(int argc, char **argv)
 	else if( spliter[0].compare("allocate")==0 && size==5 )
 	{
 		std::cout << mmu->allocate( static_cast<uint32_t>(std::stoul(spliter[1])), 
-						spliter[2], spliter[3], std::stoi(spliter[4]) )
+						spliter[2], spliter[3], std::stoi(spliter[4]), page_table )
 			  << "\n";
 	}
 	else if( spliter[0].compare("set")==0 && size>4 )
