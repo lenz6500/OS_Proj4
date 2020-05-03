@@ -13,6 +13,7 @@ PageTable::~PageTable()
 
 void PageTable::addEntry(uint32_t pid, int page_number)
 {
+	//When a new variable is on a new page.  If there's free space on an existing page, then don't need this.  However, if it's not big enough then we need to add another entry.
     // Combination of pid and page number act as the key to look up frame number
     std::string entry = std::to_string(pid) + "|" + std::to_string(page_number);
     
