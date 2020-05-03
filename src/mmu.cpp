@@ -192,9 +192,13 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 		std::vector<uint8_t> container( values[i].begin(), values[i].end() );
 		//pointer = &container[0];
 		_processes[index]->variables[var_index]->data[offset + addtlOffset] = values[i];
-		pointer = (uint8_t*)(values[i].c_str());
-		//Need to pass uint8_t* to the memory...
-		//memory[physAddr] = &pointer;
+
+
+		pointer = (uint8_t*)(&values[i]);
+		memory[physAddr] = *pointer;
+
+
+
 		//memory[physAddr] = (uint8_t*)(values[i].c_str());
 		//Still unsure how to exactly get the it to fit in here.
 		addtlOffset++;
