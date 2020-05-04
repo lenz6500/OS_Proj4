@@ -112,7 +112,8 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 	int var_index = findFreeVar(index);
 	if( var_index == -1 ){ return -1; }//error
 
-	//Need to check if FREE SPACE has enough space for the input size.
+	
+
 
 	_processes[index]->variables[var_index]->name = var_name;
 	_processes[index]->variables[var_index]->virtual_address = _processes[index]->p_virtual_address;
@@ -174,60 +175,41 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 	std::string data_type = _processes[index]->variables[var_index]->data_type;
 	multFactor = getDataSize(data_type);
 
-	
 	if( data_type.compare("char") == 0 )
 	{
-		multFactor = 1;
 		std::vector<char> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( *values[i].begin() ); }
 		std::memcpy( &memory[physAddr+offset], transfer.data(), transfer.size() );
 	}
 	else if( data_type.compare("short") == 0 )
 	{
-		multFactor = 2;
 		std::vector<short> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( (short)std::stoi(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*2], transfer.data(), 2*transfer.size() );
 	}
 	else if( data_type.compare("int") == 0 )
 	{
-		multFactor = 4;
 		std::vector<int> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoi(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
 	}
 	else if( data_type.compare("float") == 0 )
 	{
-		multFactor = 4;
 		std::vector<float> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stof(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
 	}
 	else if( data_type.compare("long") == 0 )
 	{
-		multFactor = 8;
 		std::vector<long> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoll(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
 	}
 	else if( data_type.compare("double") == 0 )
 	{
-		multFactor = 8;
 		std::vector<double> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stod(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
-	}
-
-	//track data in the memory. 
-	for(int i=0; i<values.size(); i++)
-	{
-		const char *currVal = values[i].c_str();
-
-		if((offset + addtlOffset) % pageTable->_page_size < multFactor){
-			addtlOffset = addtlOffset + (offset+ addtlOffset) % pageTable->_page_size;
-		} //Take it to the next page if it's going to fall inbetween pages.
-		memory[offset + addtlOffset] = *currVal;
-		addtlOffset = addtlOffset + 1*multFactor;		
 	}
 	return 0;
 }
@@ -263,8 +245,18 @@ int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable, uint8_t
 	//pageTable->eraseEntry( pid, _processes[index]->variables[var_index]->page_number );
 
 	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
-	_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
-	_processes[index]->variables[var_index]->size = 0; //No size allocated.
+
+	if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>"){
+		_processes[index]->variables[var_index]->size = _processes[index]->variables[var_index]->size + _processes[index]->variables[var_index+1]->size;
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1); //Expand size of previous 
+	} else if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>"){
+		_processes[index]->variables[var_index-1]->size = _processes[index]->variables[var_index-1]->size + _processes[index]->variables[var_index]->size;
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); //Expand size of previous 
+	}
+
+
+	//_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
+	//_processes[index]->variables[var_index]->size = 0; //No size allocated.
 
 	return 0;
 }
