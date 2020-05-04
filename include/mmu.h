@@ -13,9 +13,7 @@ typedef struct Variable {
     int virtual_address;
     int size;
     std::string data_type;
-    //std::vector<std::string> data;
     std::vector<int> page_numbers;
-    //int page_number;
 } Variable;
 
 
@@ -46,12 +44,13 @@ public:
     int allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element, PageTable *pageTable);
     int set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable);
     int free(uint32_t pid, std::string& var_name, PageTable *pageTable, uint8_t *memory);
-    int terminate(uint32_t pid);
+    int terminate(uint32_t pid, PageTable *pageTable);
     int findProcess(uint32_t pid);
     int findFreeVar(int pid_index);
     int findVariableIndex(std::string& varName, int index);
     int findVariableAddr(std::string& varName, int index);
     int getDataSize(std::string& data_type);
+    bool isShared(uint32_t pid, int page_number, std::string& var_name);
 
 };
 
