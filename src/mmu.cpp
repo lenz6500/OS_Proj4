@@ -37,9 +37,8 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 	{
 		printf("This would exceed the maximum amount of ram available.\n");
 		return -1;
-	}
+	} //Not enough RAM for new processes
 		_total_allocated = _total_allocated + text_size + data_size;
-		
 		int i, j, number_of_pages;
 		uint32_t pid = createProcess();
 		int index = findProcess(pid);//no error
@@ -76,8 +75,8 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 
 			Variable *stack = new Variable();
 			stack->name = "<STACK>";
-				stack->virtual_address = _processes[index]->p_virtual_address;
-				stack->size = 65536;
+			stack->virtual_address = _processes[index]->p_virtual_address;
+			stack->size = 65536;
 			_processes[index]->variables.push_back(stack);
 			_processes[index]->p_virtual_address +=  stack->size;
 
@@ -162,40 +161,40 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 	int var_index = findVariableIndex(var_name, index);
 	if( var_index == -1 ){ return -1; }//error
 
-	int addtlOffset = 0, i=0;
+	int addtlOffset = 0, i=0; //Track if you need to set multiple indicies
 	std::string data_type = _processes[index]->variables[var_index]->data_type;
 
-	if( data_type.compare("char") == 0 )
+	if( data_type.compare("char") == 0 ) //Char set
 	{
 		std::vector<char> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( *values[i].begin() ); }
 		std::memcpy( &memory[physAddr+offset], transfer.data(), transfer.size() );
 	}
-	else if( data_type.compare("short") == 0 )
+	else if( data_type.compare("short") == 0 ) //Short set
 	{
 		std::vector<short> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( (short)std::stoi(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*2], transfer.data(), 2*transfer.size() );
 	}
-	else if( data_type.compare("int") == 0 )
+	else if( data_type.compare("int") == 0 ) //Int set
 	{
 		std::vector<int> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoi(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
 	}
-	else if( data_type.compare("float") == 0 )
+	else if( data_type.compare("float") == 0 ) //Float set
 	{
 		std::vector<float> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stof(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
 	}
-	else if( data_type.compare("long") == 0 )
+	else if( data_type.compare("long") == 0 ) //Long set
 	{
 		std::vector<long> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoll(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
 	}
-	else if( data_type.compare("double") == 0 )
+	else if( data_type.compare("double") == 0 ) //Double set
 	{
 		std::vector<double> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stod(values[i]) ); }
@@ -234,19 +233,24 @@ int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable, uint8_t
 	}
 
 	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
-	//This may casue out of index exception 
-	//if there is only one or two variable in teh process.May need to check it..
-	if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>")
+	//Merge free spaces back together
+	if(_processes[index]->variables.size() > var_index-1) 
 	{
-		_processes[index]->variables[var_index]->size = _processes[index]->variables[var_index]->size + _processes[index]->variables[var_index+1]->size;
-		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1);
-		//Expand size of previous 
-	} 
-	else if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>")
+		if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>")
+		{
+			_processes[index]->variables[var_index]->size = _processes[index]->variables[var_index]->size + _processes[index]->variables[var_index+1]->size;
+			_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1);
+			//Expand size of this
+		} 
+	}
+	if(var_index >= 1)
 	{
-		_processes[index]->variables[var_index-1]->size = _processes[index]->variables[var_index-1]->size + _processes[index]->variables[var_index]->size;
-		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); 
-		//Expand size of previous 
+		if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>")
+		{
+			_processes[index]->variables[var_index-1]->size = _processes[index]->variables[var_index-1]->size + _processes[index]->variables[var_index]->size;
+			_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); 
+			//Expand size of previous
+		}
 	}
 
 	_processes[index]->variables[var_index]->virtual_address = 0; //Set to unavailable virtual address

@@ -40,14 +40,14 @@ int main(int argc, char **argv)
         // Handle command
 	spliter = splitString(command, ' ');
 	size = spliter.size();
-	if( spliter[0].compare("create")==0 && size==3 )
+	if( spliter[0].compare("create")==0 && size==3 ) //create new process, automatically generate pid.
 	{
 		text_size = std::stoi(spliter[1]);
 		data_size = std::stoi(spliter[2]);
 		std::cout << mmu->createNewProcess( text_size, data_size, page_table) << std::endl;
 		
 	}
-	else if( spliter[0].compare("allocate")==0 && size==5 )
+	else if( spliter[0].compare("allocate")==0 && size==5 ) //allocate command.
 	{
 		pid = static_cast<uint32_t>(std::stoul(spliter[1]));
 		var_name = spliter[2];
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 		num_of_elements = std::stoi(spliter[4]);
 		std::cout << mmu->allocate( pid, var_name, data_type, num_of_elements, page_table ) << std::endl;
 	}
-	else if( spliter[0].compare("set")==0 && size>4 )
+	else if( spliter[0].compare("set")==0 && size>4 ) //set value of variable in process.
 	{
 		std::vector<std::string> values;
 		for(int j=4; j<spliter.size(); j++)
@@ -67,37 +67,37 @@ int main(int argc, char **argv)
 		offset = stoi(spliter[3]);
 		mmu->set(memory, pid, var_name, offset, values, page_table);
 	}
-	else if( spliter[0].compare("print")==0 && size>1 )
+	else if( spliter[0].compare("print")==0 && size>1 ) //Print function
 	{
-		if( spliter[1].compare("mmu")==0 && size==2 )
+		if( spliter[1].compare("mmu")==0 && size==2 ) //Print mmu
 		{
 			mmu->print();
 		}
-		else if( spliter[1].compare("page")==0 )
+		else if( spliter[1].compare("page")==0 ) //Print pagetable
 		{
 			page_table->print();
 		}
-		else if( spliter[1].compare("processes")==0 )
+		else if( spliter[1].compare("processes")==0 ) //Print all processes
 		{
 			mmu->printProcesses();
 		}
 		else if( size==2 )
 		{
 			std::vector<std::string> spliter2;//assume only get correst format
-			spliter2 = splitString(spliter[1], ':');
+			spliter2 = splitString(spliter[1], ':'); //Print specific variable value
 			
 			pid = static_cast<uint32_t>(std::stoul(spliter2[0]));
 			var_name = spliter2[1];
 			mmu->printData(pid, var_name, page_table, memory);
 		}
 	}
-	else if( spliter[0].compare("free")==0 && size==3 )
+	else if( spliter[0].compare("free")==0 && size==3 ) //Free variable or process
 	{
 		pid = atoi(spliter[1].c_str());
 		var_name = spliter[2];
     		mmu->free(pid, var_name, page_table, memory);
 	}
-	else if( spliter[0].compare("terminate")==0 && size==2 )
+	else if( spliter[0].compare("terminate")==0 && size==2 ) //Terminate process
 	{
 		pid = atoi(spliter[1].c_str());
 		mmu->terminate( pid, page_table );
