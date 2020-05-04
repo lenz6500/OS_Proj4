@@ -36,7 +36,7 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 	//Check if there's enough space to create the new process.
 	if(_total_allocated + text_size + data_size > _max_size || text_size > _max_size || data_size > _max_size){
 		printf("This would exceed the maximum amount of ram available.\n");
-		return -1;
+		return 0;
 	} else {
 
 		_total_allocated = _total_allocated + text_size + data_size;
@@ -157,6 +157,8 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 }
 int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable)
 {
+
+	int multFactor;
 	int index = findProcess(pid);
 	if( index == -1 ){ return -1; }//error
 
@@ -171,51 +173,58 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 	int addtlOffset = 0, i=0;
 	std::string data_type = _processes[index]->variables[var_index]->data_type;
 	
-
 	if( data_type.compare("char") == 0 )
 	{
+		multFactor = 1;
 		std::vector<char> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( *values[i].begin() ); }
 		std::memcpy( &memory[physAddr+offset], transfer.data(), transfer.size() );
 	}
 	else if( data_type.compare("short") == 0 )
 	{
+		multFactor = 2;
 		std::vector<short> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( (short)std::stoi(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*2], transfer.data(), 2*transfer.size() );
 	}
 	else if( data_type.compare("int") == 0 )
 	{
+		multFactor = 4;
 		std::vector<int> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoi(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
 	}
 	else if( data_type.compare("float") == 0 )
 	{
+		multFactor = 4;
 		std::vector<float> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stof(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
 	}
 	else if( data_type.compare("long") == 0 )
 	{
+		multFactor = 8;
 		std::vector<long> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoll(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
 	}
 	else if( data_type.compare("double") == 0 )
 	{
+		multFactor = 8;
 		std::vector<double> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stod(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
 	}
 
 	//track data in the memory.
-	//for(int i=0; i<values.size(); i++)
-	//{
-		//_processes[index]->variables[var_index]->data[offset + addtlOffset] = values[i];
-		//Still unsure how to exactly get the it to fit in here.
-	//	addtlOffset++;
-	//}
+	for(int i=0; i<values.size(); i++)
+	{
+		const char *currVal = values[i].c_str();
+		memory[offset + addtlOffset] = *currVal;
+
+		addtlOffset = addtlOffset + 1*multFactor;		
+
+	}
 	return 0;
 }
 
