@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     int  number_of_pages;
 
     //TEST:BEGIN
-    /*
+    
 	mmu->createNewProcess(5992,564,page_table);
 	page_table->print();
 
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 	mmu->terminate(1025);
 	mmu->print();
 
-	*/
+	
 
 
 	
