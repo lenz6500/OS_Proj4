@@ -151,8 +151,6 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 }
 int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable)
 {
-
-	int multFactor;
 	int index = findProcess(pid);
 	if( index == -1 ){ return -1; }//error
 
@@ -166,7 +164,6 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 
 	int addtlOffset = 0, i=0;
 	std::string data_type = _processes[index]->variables[var_index]->data_type;
-	multFactor = getDataSize(data_type);
 
 	if( data_type.compare("char") == 0 )
 	{
@@ -237,20 +234,22 @@ int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable, uint8_t
 	}
 
 	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
-	//This may casue out of index exception if there is only one or two variable in teh process.May need to check it..
+	//This may casue out of index exception 
+	//if there is only one or two variable in teh process.May need to check it..
 	if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>")
 	{
 		_processes[index]->variables[var_index]->size = _processes[index]->variables[var_index]->size + _processes[index]->variables[var_index+1]->size;
-		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1); //Expand size of previous 
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1);
+		//Expand size of previous 
 	} 
 	else if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>")
 	{
 		_processes[index]->variables[var_index-1]->size = _processes[index]->variables[var_index-1]->size + _processes[index]->variables[var_index]->size;
-		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); //Expand size of previous 
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); 
+		//Expand size of previous 
 	}
 
-
-	//_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
+	_processes[index]->variables[var_index]->virtual_address = 0; //Set to unavailable virtual address
 
 	return 0;
 }

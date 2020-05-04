@@ -81,9 +81,13 @@ int main(int argc, char **argv)
 		{
 			mmu->printProcesses();
 		}
-		else{
-			pid = atoi(spliter[1].c_str());
-			var_name = spliter[2];	
+		else if( size==2 )
+		{
+			std::vector<std::string> spliter2;//assume only get correst format
+			spliter2 = splitString(spliter[1], ':');
+			
+			pid = static_cast<uint32_t>(std::stoul(spliter2[0]));
+			var_name = spliter2[1];
 			mmu->printData(pid, var_name, page_table, memory);
 		}
 	}
