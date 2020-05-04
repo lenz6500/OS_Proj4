@@ -112,7 +112,8 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 	int var_index = findFreeVar(index);
 	if( var_index == -1 ){ return -1; }//error
 
-	//Need to check if FREE SPACE has enough space for the input size.
+	
+
 
 	_processes[index]->variables[var_index]->name = var_name;
 	_processes[index]->variables[var_index]->virtual_address = _processes[index]->p_virtual_address;
@@ -217,7 +218,7 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 	}
 
 	//track data in the memory.
-	for(int i=0; i<values.size(); i++)
+	/*for(int i=0; i<values.size(); i++)
 	{
 		const char *currVal = values[i].c_str();
 
@@ -228,7 +229,7 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 
 		addtlOffset = addtlOffset + 1*multFactor;		
 
-	}
+	}*/
 	return 0;
 }
 
@@ -263,8 +264,18 @@ int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable, uint8_t
 	//pageTable->eraseEntry( pid, _processes[index]->variables[var_index]->page_number );
 
 	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
-	_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
-	_processes[index]->variables[var_index]->size = 0; //No size allocated.
+
+	if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>"){
+		_processes[index]->variables[var_index-1]->size = _processes[index]->variables[var_index-1]->size + _processes[index]->variables[var_index]->size;
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); //Expand size of previous 
+	} else if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>"){
+		_processes[index]->variables[var_index]->size = _processes[index]->variables[var_index]->size + _processes[index]->variables[var_index+1]->size;
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1); //Expand size of previous 
+	}
+
+
+	//_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
+	//_processes[index]->variables[var_index]->size = 0; //No size allocated.
 
 	return 0;
 }
