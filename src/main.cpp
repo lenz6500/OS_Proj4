@@ -4,9 +4,6 @@
 #include "mmu.h"
 #include "pagetable.h"
 
-
-
-
 void printStartMessage(int page_size);
 std::vector<std::string> splitString(std::string text, char d);
 int main(int argc, char **argv)
@@ -29,161 +26,7 @@ int main(int argc, char **argv)
     PageTable *page_table = new PageTable(page_size);
     int  number_of_pages;
 
-    //TEST:BEGIN
-    /*
-	mmu->createNewProcess(5992,564,page_table);
-	page_table->print();
-
-    mmu->createNewProcess(14788,296,page_table);
-	page_table->print();
-
-    mmu->print();
-	int t = 0;
-	int addr = 0;
-	t = mmu->allocate( 1024, "point_x", "int", 1, page_table );
-
-	addr = page_table->getPhysicalAddress(1024, t);
-
-	t = mmu->allocate( 1024, "point_y", "int", 1, page_table );
-
-	addr = page_table->getPhysicalAddress(1024, t);
-
-	t = mmu->allocate( 1025, "temperature", "double", 1, page_table );
-
-	addr = page_table->getPhysicalAddress(1025, t);
-
-	t = mmu->allocate( 1024, "name", "char", 256, page_table );
-
-	addr = page_table->getPhysicalAddress(1024, t);
-
-	t = mmu->allocate( 1024, "time", "long", 2, page_table );
-
-	addr = page_table->getPhysicalAddress(1024, t);
-
-	t = mmu->allocate( 1024, "data", "int", 2000, page_table );
-
-	addr = page_table->getPhysicalAddress(1024, t);
-
-	t = mmu->allocate( 1025, "pressure", "double", 1, page_table );
-
-	addr = page_table->getPhysicalAddress(1025, t);
-    	mmu->print();
-
-
-	std::string data2 = "data";
-	std::string time = "time";
-	std::string x = "point_x";
-	int index = mmu->findProcess(1024);
-
-
-	int address = mmu->findVariableAddr(x, index);
-	int phy_address = page_table->getPhysicalAddress(1024, address);
-	std::cout << "point_x vd: " <<  address << "  phy address: " << phy_address <<"\n";
-
-
-	address = mmu->findVariableAddr(time, index);
-	phy_address = page_table->getPhysicalAddress(1024, address);
-	std::cout << "time vd: " <<  address << "  phy address: " << phy_address <<"\n";
-
-
-	address = mmu->findVariableAddr(data2, index);
-	phy_address = page_table->getPhysicalAddress(1024, address);
-	std::cout << "data vd: " <<  address << "  phy address: " << phy_address <<"\n";
-
-
-	std::string temperature = "temperature";
-	std::string pressure = "pressure";
-	index = mmu->findProcess(1025);
-
-
-	address = mmu->findVariableAddr(temperature, index);
-	phy_address = page_table->getPhysicalAddress(1025, address);
-	std::cout << "temperature vd: " <<  address << "  phy address: " << phy_address <<"\n";
-
-
-	address = mmu->findVariableAddr(pressure, index);
-	phy_address = page_table->getPhysicalAddress(1025, address);
-	std::cout << "pressure vd: " <<  address << "  phy address: " << phy_address <<"\n";
-
-
-	//page_table->print();
-	
-
-	std::string name = "name";
-	std::vector<std::string> values;
-	values.push_back("l");
-	values.push_back("o");
-	values.push_back("c");
-	values.push_back("a");
-	values.push_back("t");
-	values.push_back("i");
-	values.push_back("o");
-	values.push_back("n");
-	mmu->set( memory, 1024, name, 0, values, page_table);
-	mmu->printData(1024, name, page_table, memory);
-	//mmu->print();
-	//page_table->print();
-
-
-	std::vector<std::string> values2;
-	values2.push_back("9123456");
-	
-	mmu->set( memory, 1024, time, 0, values2, page_table);
-	mmu->printData(1024, time, page_table, memory);
-
-	std::cout << " T T \n";
-	std::vector<std::string> values4;
-	values4.push_back("9756311357");
-	mmu->set( memory, 1024, time, 1, values4, page_table);
-	mmu->printData(1024, time, page_table, memory);
-
-	//std::vector<std::string> values3;
-	//values3.push_back("98.6");
-	//mmu->set( memory, 1025, temperature, 0, values3, page_table);
-	//mmu->printData(1025, temperature, page_table, memory);
-
-	//mmu->free( 1024, data2 , page_table, memory );
-	//mmu->free( 1024, name , page_table, memory );
-	//page_table->print();
-
-
-	mmu->terminate(1025);
-	mmu->print();
-
-	*/
-
-
-	
-	/*std::string time = "time";
-	std::vector<std::string> values2;
-	values2.push_back("91235684");
-	mmu->set( memory, 1024, time, 0, values2, page_table);
-	std::vector<std::string> values3;
-	values3.push_back("35764365486");
-	mmu->set( memory, 1024, time, 1, values3, page_table);
-	mmu->printData(1024, time);
-
-	std::string data = "data";
-	mmu->free( 1024, data , page_table );
-	mmu->print();
-	page_table->print();
-
-	*/
-
-	/*std::vector<std::string> values3;
-	values.push_back("3214567");
-	mmu->set( memory, 1025, time, 1, values3, page_table);*/
-	//mmu->printData(1025, time);
-	
-
-	//mmu->terminate(1025);
-    	//mmu->print();
-
-	//page_table->print();
-    //TEST:END
-
     std::vector<std::string> spliter;
-    
     int size = 0, text_size = 0, data_size = 0, num_of_elements = 0, offset = 0;
     uint32_t pid = 0;
     std::string var_name;
@@ -238,9 +81,13 @@ int main(int argc, char **argv)
 		{
 			mmu->printProcesses();
 		}
-		else{
-			pid = atoi(spliter[1].c_str());
-			var_name = spliter[2];	
+		else if( size==2 )
+		{
+			std::vector<std::string> spliter2;//assume only get correst format
+			spliter2 = splitString(spliter[1], ':');
+			
+			pid = static_cast<uint32_t>(std::stoul(spliter2[0]));
+			var_name = spliter2[1];
 			mmu->printData(pid, var_name, page_table, memory);
 		}
 	}
@@ -253,7 +100,7 @@ int main(int argc, char **argv)
 	else if( spliter[0].compare("terminate")==0 && size==2 )
 	{
 		pid = atoi(spliter[1].c_str());
-		mmu->terminate( pid );
+		mmu->terminate( pid, page_table );
 	}
 	else
 	{

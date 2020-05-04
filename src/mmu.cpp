@@ -5,7 +5,7 @@ Mmu::Mmu(int memory_size)
 {
     _next_pid = 1024;
     _max_size = memory_size;
-	_total_allocated = STACK_SIZE;
+    _total_allocated = STACK_SIZE;
 }
 
 Mmu::~Mmu()
@@ -32,15 +32,13 @@ uint32_t Mmu::createProcess()
 }
 uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable *pageTable)
 {
-
 	//Check if there's enough space to create the new process.
-	if(_total_allocated + text_size + data_size > _max_size || text_size > _max_size || data_size > _max_size){
+	if(_total_allocated + text_size + data_size > _max_size || text_size > _max_size || data_size > _max_size)
+	{
 		printf("This would exceed the maximum amount of ram available.\n");
-		return 0;
-	} else {
-
+		return -1;
+	}
 		_total_allocated = _total_allocated + text_size + data_size;
-
 		
 		int i, j, number_of_pages;
 		uint32_t pid = createProcess();
@@ -91,18 +89,16 @@ uint32_t Mmu::createNewProcess(uint32_t text_size, uint32_t data_size, PageTable
 				_processes[index]->variables[2]->page_numbers.push_back(i);
 			}
 
-			_max_size -= _processes[index]->p_virtual_address;
-			//std::cout <<"MAX size"<<_max_size<<"\n";
-			//std::cout <<"next page"<<_processes[index]->_next_page<<"\n";
+				_max_size -= _processes[index]->p_virtual_address;
+				//std::cout <<"MAX size"<<_max_size<<"\n";
 
 				Variable *var = new Variable();
 				var->name = "<FREE_SPACE>";
 				var->virtual_address = -1;
-				var->size = _max_size - _processes[index]->p_virtual_address;
-			_processes[index]->variables.push_back(var);
+				var->size = _max_size ;//max available size
+				_processes[index]->variables.push_back(var);
 		}//free space
 		return pid;
-	}
 }
 int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string& data_type, int num_element, PageTable *pageTable)
 {
@@ -112,21 +108,18 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 	int var_index = findFreeVar(index);
 	if( var_index == -1 ){ return -1; }//error
 
-	
+	std::string data_type2 = data_type;
+	int data_size = getDataSize( data_type2 );
 
+	if( _max_size < data_size * num_element ){ std::cout << "Not enough space to allocate. \n"; return -1; }
 
 	_processes[index]->variables[var_index]->name = var_name;
 	_processes[index]->variables[var_index]->virtual_address = _processes[index]->p_virtual_address;
 
 	int virtual_addr = 0;
-
 	_processes[index]->variables[var_index]->data_type = data_type;
 	//set size
-	int data_size = getDataSize( _processes[index]->variables[var_index]->data_type );
 	_processes[index]->variables[var_index]->size = data_size * num_element;
-    
-	//_processes[index]->variables[var_index]->data.resize(num_element);
-	//Resize to how many elements supposed to be able to hold.
 	
 	virtual_addr = _processes[index]->p_virtual_address;
 	_processes[index]->p_virtual_address +=  _processes[index]->variables[var_index]->size;
@@ -158,8 +151,6 @@ int Mmu::allocate( uint32_t pid, const std::string& var_name, const std::string&
 }
 int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offset, std::vector<std::string> values, PageTable *pageTable)
 {
-
-	int multFactor;
 	int index = findProcess(pid);
 	if( index == -1 ){ return -1; }//error
 
@@ -173,63 +164,43 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 
 	int addtlOffset = 0, i=0;
 	std::string data_type = _processes[index]->variables[var_index]->data_type;
-	
+
 	if( data_type.compare("char") == 0 )
 	{
-		multFactor = 1;
 		std::vector<char> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( *values[i].begin() ); }
 		std::memcpy( &memory[physAddr+offset], transfer.data(), transfer.size() );
 	}
 	else if( data_type.compare("short") == 0 )
 	{
-		multFactor = 2;
 		std::vector<short> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( (short)std::stoi(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*2], transfer.data(), 2*transfer.size() );
 	}
 	else if( data_type.compare("int") == 0 )
 	{
-		multFactor = 4;
 		std::vector<int> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoi(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
 	}
 	else if( data_type.compare("float") == 0 )
 	{
-		multFactor = 4;
 		std::vector<float> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stof(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*4], transfer.data(), 4*transfer.size() );
 	}
 	else if( data_type.compare("long") == 0 )
 	{
-		multFactor = 8;
 		std::vector<long> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stoll(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
 	}
 	else if( data_type.compare("double") == 0 )
 	{
-		multFactor = 8;
 		std::vector<double> transfer;
 		for(i=0; i<values.size(); i++){ transfer.push_back( std::stod(values[i]) ); }
 		std::memcpy( &memory[physAddr+offset*8], transfer.data(), 8*transfer.size() );
 	}
-
-	//track data in the memory.
-	/*for(int i=0; i<values.size(); i++)
-	{
-		const char *currVal = values[i].c_str();
-
-		if((offset + addtlOffset) % pageTable->_page_size < multFactor){
-			addtlOffset = addtlOffset + (offset+ addtlOffset) % pageTable->_page_size;
-		} //Take it to the next page if it's going to fall inbetween pages.
-		memory[offset + addtlOffset] = *currVal;
-
-		addtlOffset = addtlOffset + 1*multFactor;		
-
-	}*/
 	return 0;
 }
 
@@ -251,42 +222,57 @@ int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable, uint8_t
 
 	for(int offset=0; offset<num_of_elements; offset++){ memory[physAddr+offset*data_size] = 0; }//reset values
 
-	//this is going to delete other varialbes located in same allocation, is that ok?
 	int page_number = 0;
+	std::string name;
 	for(int j=0; j<_processes[index]->variables[var_index]->page_numbers.size(); j++)
 	{
 		page_number = _processes[index]->variables[var_index]->page_numbers[j];
-	//	std::cout <<"PAGE NUM: "<< _processes[index]->variables[var_index]->page_number <<"\n";
-		pageTable->eraseEntry( pid, page_number );
+		name = _processes[index]->variables[var_index]->name;
+		//kill all not shatred entries.
+		if( !isShared(pid, page_number, name) ){ pageTable->eraseEntry( pid, page_number ); }
 		//_processes[index]->_next_page--;
 	}
-	//std::cout <<"PAGE NUM: "<< _processes[index]->variables[var_index]->page_number <<"\n";
-	//pageTable->eraseEntry( pid, _processes[index]->variables[var_index]->page_number );
 
 	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
-
-	if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>"){
+	//This may casue out of index exception 
+	//if there is only one or two variable in teh process.May need to check it..
+	if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>")
+	{
 		_processes[index]->variables[var_index]->size = _processes[index]->variables[var_index]->size + _processes[index]->variables[var_index+1]->size;
-		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1); //Expand size of previous 
-	} else if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>"){
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1);
+		//Expand size of previous 
+	} 
+	else if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>")
+	{
 		_processes[index]->variables[var_index-1]->size = _processes[index]->variables[var_index-1]->size + _processes[index]->variables[var_index]->size;
-		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); //Expand size of previous 
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); 
+		//Expand size of previous 
 	}
 
-
-	//_processes[index]->variables[var_index]->virtual_address = -1; //Set to unavailable virtual address
-	//_processes[index]->variables[var_index]->size = 0; //No size allocated.
+	_processes[index]->variables[var_index]->virtual_address = 0; //Set to unavailable virtual address
 
 	return 0;
 }
-int Mmu::terminate(uint32_t pid)
+int Mmu::terminate(uint32_t pid, PageTable *pageTable)
 {
 	int pid_index = findProcess(pid);
 	if( pid_index == -1 ){ return -1; }//error
 
+	int i, j, k;
+	int page_number = 0;
+	std::string name;
+	for(j=0; j<_processes[pid_index]->variables.size(); j++)
+	{
+		for(k=0; k<_processes[pid_index]->variables[j]->page_numbers.size(); k++)
+		{
+			page_number = _processes[pid_index]->variables[j]->page_numbers[k];
+			name = _processes[pid_index]->variables[j]->name;
+			pageTable->eraseEntry( pid, page_number );//kill all entries in the process.
+		}
+	}
+
 	_processes[pid_index]->variables.clear();//clear all varialbes
-	//not sure
-	_max_size = _max_size + _processes[pid_index]->p_virtual_address;
+	_max_size = _max_size + _processes[pid_index]->p_virtual_address;//restore it to the size.
 	delete _processes[pid_index];//delete the process
 	
 	return 0;
@@ -461,4 +447,24 @@ int Mmu::getDataSize(std::string& data_type)
 	else if( data_type.compare("int") == 0 || data_type.compare("float") == 0 ){ return 4; }
 	else if( data_type.compare("long") == 0 || data_type.compare("double") == 0 ){ return 8; }
 	return -1;
+}
+bool Mmu::isShared(uint32_t pid, int page_number, std::string& var_name)
+{
+	int i, j, k;
+	for(i=0; i<_processes.size(); i++)
+	{
+		for(j = 0; j < _processes[i]->variables.size(); j++)
+		{
+			for(k=0; k<_processes[i]->variables[j]->page_numbers.size(); k++)
+			{
+				if( _processes[i]->variables[j]->page_numbers[k] == page_number &&
+					_processes[i]->variables[j]->name !=  var_name &&
+					pid == _processes[i]->pid )
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
