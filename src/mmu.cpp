@@ -265,12 +265,12 @@ int Mmu::free(uint32_t pid, std::string& var_name, PageTable *pageTable, uint8_t
 
 	_processes[index]->variables[var_index]->name = "<FREE_SPACE>"; //Set back to free.
 
-	if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>"){
-		_processes[index]->variables[var_index-1]->size = _processes[index]->variables[var_index-1]->size + _processes[index]->variables[var_index]->size;
-		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); //Expand size of previous 
-	} else if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>"){
+	if (_processes[index]->variables[var_index+1]->name == "<FREE_SPACE>"){
 		_processes[index]->variables[var_index]->size = _processes[index]->variables[var_index]->size + _processes[index]->variables[var_index+1]->size;
 		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index+1); //Expand size of previous 
+	} else if(_processes[index]->variables[var_index-1]->name == "<FREE_SPACE>"){
+		_processes[index]->variables[var_index-1]->size = _processes[index]->variables[var_index-1]->size + _processes[index]->variables[var_index]->size;
+		_processes[index]->variables.erase(_processes[index]->variables.begin() + var_index); //Expand size of previous 
 	}
 
 
