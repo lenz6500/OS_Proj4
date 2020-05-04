@@ -220,6 +220,10 @@ int Mmu::set(uint8_t *memory, uint32_t pid, std::string& var_name, uint32_t offs
 	for(int i=0; i<values.size(); i++)
 	{
 		const char *currVal = values[i].c_str();
+
+		if((offset + addtlOffset) % pageTable->_page_size < multFactor){
+			addtlOffset = addtlOffset + (offset+ addtlOffset) % pageTable->_page_size;
+		} //Take it to the next page if it's going to fall inbetween pages.
 		memory[offset + addtlOffset] = *currVal;
 
 		addtlOffset = addtlOffset + 1*multFactor;		

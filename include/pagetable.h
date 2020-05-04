@@ -8,13 +8,13 @@
 
 class PageTable {
 private:
-    int _page_size;
     std::map<std::string, int> _table;
     std::vector<bool> *frame_table;
 
 public:
     PageTable(int page_size);
     ~PageTable();
+	int _page_size;
 
     void addEntry(uint32_t pid, int page_number);
     int getPhysicalAddress(uint32_t pid, int virtual_address);
